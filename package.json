@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "concurrently \"cd client && yarn build\"  \"cd server && yarn build\"",
-    "start": "concurrently \"cd server && yarn start\" \"cd client && yarn start\""
+    "dev": "concurrently \"cd server && yarn dev\" \"cd client && yarn start\"",
+    "start": "yarn build && cd server && yarn start"
   },
   "keywords": [],
   "author": "",

@@ -1,10 +1,46 @@
-import { addCmd, login, send } from "@ursamu/core";
+import {
+  addCmd,
+  createEntity,
+  DB,
+  DBObj,
+  hash,
+  login,
+  send,
+} from "@ursamu/core";
 
-addCmd({
-  name: "create",
-  pattern: "",
-  render: async (args, ctx) => {
-    const token = await login(ctx.socket, args[1], args[2]);
-    send(ctx.id, "Welcome to the game!", { token });
-  },
-});
+export default () => {
+  addCmd({
+    name: "create",
+    pattern: /^create\s+(\w+)\s+(\w+)/i,
+    flags: "!conencted",
+    render: async (args, ctx) => {
+      // Look for players that have the same name.
+      const taken = await DB.dbs.db.find<DBObj>({
+        $where: function () {
+          return (
+            this.flags.includes("player") &&
+            this.name.toLowerCase() === args[1].toLowerCase()
+          );
+        },
+      });
+
+      if (!taken.length) {
+        const pwd = await hash(args[2]);
+        // Create a new entity.
+        const player = await createEntity("", args[1], "player", {
+          password: pwd,
+        });
+
+        // update the owner of the character to itsself.
+        player.owner = player._id || "";
+        await DB.dbs.db.update<DBObj>({ id: player._id }, player);
+
+        // Log the new player in and fire off some beginning commands!
+        const token = await login(ctx.socket, args[1], args[2]);
+        send(ctx.id, "Welcome to the game!", { token });
+      } else {
+        send(ctx.id, "That name is already taken or unavailable.");
+      }
+    },
+  });
+};

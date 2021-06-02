@@ -3,7 +3,6 @@ import { cmds, Context, DB, flags, send } from "@ursamu/core";
 export default async (ctx: Context) => {
   if (!ctx.data?.found) {
     try {
-      console.log(cmds);
       for (const cmd of cmds) {
         const match = ctx.msg?.match(cmd.pattern);
         if (match) {

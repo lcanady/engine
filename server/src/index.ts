@@ -2,6 +2,7 @@ import {
   server,
   MUSocket,
   app,
+  Config,
   DB,
   dbrefs,
   loaddir,
@@ -12,8 +13,8 @@ import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
 import charRoutes from "./routes/charRoutes";
 import dotenv from "dotenv";
-import cors from "cors";
 import commands from "./hooks/commands";
+import auth from "./hooks/auth";
 
 dotenv.config();
 
@@ -28,8 +29,10 @@ The modern MU* Server
 listening on port: ${process.env.PORT || 4201}
 `.trim();
 
-// Handle routes.
+// Read the config directory.
+export const config = new Config(path.resolve("../config/"));
 
+// Handle routes.
 app.use("/api/v1/wiki", wikiRoutes);
 app.use("/api/v1/chars", charRoutes);
 
@@ -38,7 +41,7 @@ DB.attach("db", new DB(path.resolve(__dirname, "../../data/db.db")));
 DB.attach("wiki", new DB(path.resolve(__dirname, "../../data/wiki.db")));
 
 // load hooks.
-hooks.use(commands);
+hooks.use(auth, commands);
 
 // Initialize the dbref system.
 dbrefs.init();
@@ -49,8 +52,6 @@ dbrefs.init();
   await loaddir(path.join(__dirname, "./commands/"));
 })();
 
-io.on("connect", (socket: MUSocket) => {
-  socket.send({ msg: "Welcome to the game@!!!", data: {} });
-});
+io.on("connect", (socket: MUSocket) => {});
 
 server.listen(4201, () => console.log(intro));

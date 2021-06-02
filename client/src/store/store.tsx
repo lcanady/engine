@@ -1,5 +1,4 @@
 import { createContext, useState } from "react";
-import { PropsWithChildren } from "react";
 
 export interface Context {
   data: { [key: string]: any };

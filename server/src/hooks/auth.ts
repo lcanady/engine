@@ -1,4 +1,4 @@
-import { Context, DB, DBObj, Next } from "@ursamu/core";
+import { Context, Next } from "@ursamu/core";
 import { db } from "..";
 
 export default async (ctx: Context, next: Next) => {

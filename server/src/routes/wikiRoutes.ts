@@ -1,4 +1,4 @@
-import { DB, Article, flags, MuRequest } from "@ursamu/core";
+import { Article, flags, MuRequest } from "@ursamu/core";
 import express, { Router } from "express";
 import { wiki } from "..";
 import webAuth from "../middleware/webAuth";

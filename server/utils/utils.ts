@@ -1,11 +1,21 @@
-import { compare, Data, DBObj, MUSocket, sign } from "@ursamu/core";
+import { compare, Data, DBObj, flags, MUSocket, sign } from "@ursamu/core";
 import { db } from "../src";
 
-export const login = async (name: string, password: string) => {
+export const login = async (
+  socket: MUSocket,
+  name: string,
+  password: string
+) => {
   const regex = new RegExp(name, "i");
   const player = (await db.find({ name: regex }))[0];
   if (player) {
     if (compare(password, player.password || "")) {
+      socket.cid = player._id;
+      const { tags } = flags.set(player.flags, {}, "connected");
+      player.flags = tags.trim();
+      await db.update({ _id: player._id }, player);
+      join(socket, player);
+
       return sign(player._id!, process.env.SECRET || "");
     }
   }

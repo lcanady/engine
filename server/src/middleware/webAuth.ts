@@ -1,4 +1,5 @@
 import { express, verify, DB, DBObj } from "@ursamu/core";
+import { db } from "..";
 
 const webAuth = async (
   req: any,
@@ -14,7 +15,7 @@ const webAuth = async (
       );
       if (!verified) return res.sendStatus(403);
 
-      const player = (await DB.dbs.db.get(verified.id)) as DBObj;
+      const player = (await db.get(verified.id)) as DBObj;
       req.player = player;
 
       next();

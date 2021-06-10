@@ -31,6 +31,23 @@ const Container = styled.div`
 
 const Output = styled.div`
   width: 100%;
+  p {
+    margin-top: 4px;
+    margin-left: 8px;
+    margin-bottom: 4px;
+    a {
+      color: white;
+      font-weight: bold;
+    }
+  }
+
+  blockquote {
+    padding: 4px 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  code {
+  }
 `;
 
 const Client = () => {

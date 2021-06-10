@@ -1,18 +1,12 @@
-import {
-  compare,
-  createEntity,
-  DB,
-  DBObj,
-  express,
-  hash,
-  sign,
-} from "@ursamu/core";
+import { compare, DBObj, express, hash, sign } from "@ursamu/core";
+import { db } from "..";
+import { createEntity } from "../../utils/utils";
 
 const router: express.Router = express.Router();
 
 router.post("/register", async (req, res) => {
   try {
-    const players = (await DB.dbs.db.find<DBObj>({})).filter((obj: DBObj) =>
+    const players = (await db.find({})).filter((obj: DBObj) =>
       obj.flags.includes("player")
     );
     const taken = players.filter(
@@ -24,14 +18,11 @@ router.post("/register", async (req, res) => {
 
     const hsh = await hash(req.body.password);
 
-    const player = await createEntity("SYSTEM", req.body.name, "player", {
+    const player = await createEntity(req.body.name, "player", {
       password: hsh,
     });
 
-    const token = await sign(
-      player._id!,
-      process.env.SECRET || "YOUSHOULDCHANGETHIS"
-    );
+    const token = await sign(player._id!, process.env.SECRET || "");
     res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -41,17 +32,14 @@ router.post("/register", async (req, res) => {
 router.post("/", async (req, res) => {
   const regex = new RegExp(req.body.name, "i");
   try {
-    const player = (
-      await DB.dbs.db.find<DBObj>({ $or: [{ name: regex }, { alias: regex }] })
-    )[0];
+    const player = ((await db.find({
+      $or: [{ name: regex }, { alias: regex }],
+    })) || [])[0];
 
     const valid = await compare(req.body.password, player.password || "");
     if (!valid) return res.sendStatus(403);
 
-    const token = await sign(
-      player._id!,
-      process.env.SECRET || "YOUSHOULDCHANGETHIS"
-    );
+    const token = await sign(player._id!, process.env.SECRET || "");
     res.status(200).json({ token });
   } catch (error) {
     res.status(500).json({ error: error.message });

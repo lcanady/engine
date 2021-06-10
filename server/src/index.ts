@@ -1,13 +1,12 @@
 import {
   server,
-  MUSocket,
   app,
   Config,
   DB,
-  dbrefs,
   loaddir,
   hooks,
-  io,
+  DBObj,
+  Article,
 } from "@ursamu/core";
 import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -37,21 +36,18 @@ app.use("/api/v1/wiki", wikiRoutes);
 app.use("/api/v1/chars", charRoutes);
 
 // Assign DB references.
-DB.attach("db", new DB(path.resolve(__dirname, "../../data/db.db")));
-DB.attach("wiki", new DB(path.resolve(__dirname, "../../data/wiki.db")));
+export const db = new DB<DBObj>(path.resolve(__dirname, "../../data/db.db"));
+export const wiki = new DB<Article>(
+  path.resolve(__dirname, "../../data/wiki.db")
+);
 
 // load hooks.
 hooks.use(auth, commands);
-
-// Initialize the dbref system.
-dbrefs.init();
 
 // load plugins
 (async () => {
   await loaddir(path.join(__dirname, "./plugins/"));
   await loaddir(path.join(__dirname, "./commands/"));
 })();
-
-io.on("connect", (socket: MUSocket) => {});
 
 server.listen(4201, () => console.log(intro));

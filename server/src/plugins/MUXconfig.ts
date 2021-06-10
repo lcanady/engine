@@ -1,5 +1,6 @@
-import { createEntity, DB, DBObj, flags } from "@ursamu/core";
-import { config } from "..";
+import { DB, DBObj, flags } from "@ursamu/core";
+import { db } from "..";
+import { createEntity } from "../../utils/utils";
 
 export default async () => {
   flags.add(
@@ -14,6 +15,12 @@ export default async () => {
       code: "w",
       lvl: 9,
       lock: "immortal",
+    },
+    {
+      name: "staff",
+      code: "s",
+      lvl: 5,
+      lock: "wizard+",
     },
     {
       name: "player",
@@ -36,15 +43,15 @@ export default async () => {
   );
 
   // Make sure initial room has been created.  Should only fire at first creation of db file.
-  const rooms = await DB.dbs.db.find<DBObj>({
+  const rooms = await db.find({
     $where: function () {
       return this.flags.includes("room");
     },
   });
 
   if (!rooms.length) {
-    const room = await createEntity("", "Limbo", "room");
+    const room = await createEntity("Limbo", "room");
     room.owner = room._id!;
-    await DB.dbs.db.update({ _id: room._id }, room);
+    await db.update({ _id: room._id }, room);
   }
 };

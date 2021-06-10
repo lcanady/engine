@@ -6,11 +6,14 @@ const Input = styled.div`
   min-height: 72px;
   max-height: 500px;
   overflow-y: auto;
-  width: 100%;
+  width: 80%;
   margin-top: 24px;
   background-color: rgba(255, 255, 255, 0.1);
   outline: none;
   padding: 24px;
+  @media only screen and (max-width: 1024px) {
+    width: 100%;
+  }
 `;
 
 interface Props {

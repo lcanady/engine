@@ -1,16 +1,17 @@
-import { DBObj, DB, Article, flags } from "@ursamu/core";
+import { DB, Article, flags, MuRequest } from "@ursamu/core";
 import express, { Router } from "express";
+import { wiki } from "..";
 import webAuth from "../middleware/webAuth";
 
 const router: Router = express.Router();
 
-router.post("/", webAuth, async (req, res) => {
+router.post("/", webAuth, async (req: MuRequest, res) => {
   try {
-    const article: Article = await DB.dbs.wiki.create({
+    const article: Article = await wiki.create({
       title: req.body.title,
       body: req.body.body,
       category: req.body?.category?.toLowerCase() || "general",
-      created_by: req.body.created_by || req.player._id,
+      created_by: req.body.created_by || req.player?._id,
       slug: req.body.slug,
       created_at: Date.now(),
     });
@@ -21,9 +22,9 @@ router.post("/", webAuth, async (req, res) => {
   }
 });
 
-router.get("/category/:category", async (req, res) => {
+router.get("/category/:category", async (req: MuRequest, res) => {
   try {
-    let articles = await DB.dbs.wiki.find<Article>({
+    let articles = await wiki.find({
       $where: function () {
         const pflags = req.player?.flags || "";
         if (

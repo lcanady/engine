@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import gfm from "remark-gfm";
 import { Context, MyContext, MyContextInterface } from "../store/store";
 import InputBox from "../components/Input";
+import Look from "../components/Look";
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -12,6 +13,7 @@ const Wrapper = styled.div`
   font-family: "Roboto Mono", monospace;
   font-weight: lighter;
   color: white;
+  justify-content: center;
   padding: 14px;
   overflow: hidden;
   display: flex;
@@ -20,8 +22,7 @@ const Wrapper = styled.div`
 `;
 
 const Container = styled.div`
-  margin-top: auto;
-  width: 80%;
+  width: 60%;
   max-width: 1024px;
 
   @media only screen and (max-width: 1024px) {
@@ -29,8 +30,21 @@ const Container = styled.div`
   }
 `;
 
-const Output = styled.div`
+interface OutputProps {
+  height: number;
+}
+const Output = styled.div<OutputProps>`
   width: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  flex-shrink: 1;
+  height: calc(100vh - ${({ height }) => height}px - 100px);
+  margin-top: 56px;
+  overflow-y: overlay;
+  * {
+    overflow-anchor: none;
+  }
+
   p {
     margin-top: 4px;
     margin-left: 8px;
@@ -43,6 +57,8 @@ const Output = styled.div`
 
   blockquote {
     padding: 4px 0;
+    padding-left: 4px;
+
     border-left: 1px solid rgba(255, 255, 255, 0.7);
   }
 
@@ -54,6 +70,7 @@ const Client = () => {
   const { msgs, addMsg, setToken } =
     useContext<Partial<MyContextInterface>>(MyContext);
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [height, setHeight] = useState(72);
 
   useEffect(() => {
     const connect = () => {
@@ -62,7 +79,7 @@ const Client = () => {
         socket.send({ msg: "connect Foobar animefan", data: {} })
       );
       socket.on("message", (data: Context) => {
-        addMsg!((v) => [...v, data]);
+        addMsg!((v) => [data, ...v]);
         if (data.data.token) setToken!(data.data.token);
       });
 
@@ -74,9 +91,11 @@ const Client = () => {
   return (
     <Wrapper>
       <Container>
-        <Output>
+        <Output height={height}>
           {msgs?.map((ctx, i) => {
             switch (ctx.data.type) {
+              case "look":
+                return <Look ctx={ctx} />;
               default:
                 return (
                   <ReactMarkdown remarkPlugins={[gfm]} key={i}>
@@ -85,9 +104,12 @@ const Client = () => {
                 );
             }
           })}
+          <div
+            style={{ overflowAnchor: "auto", width: "100%", minHeight: "3px" }}
+          ></div>
         </Output>
+        <InputBox socket={socket} setHeight={setHeight} />
       </Container>
-      <InputBox socket={socket} />
     </Wrapper>
   );
 };

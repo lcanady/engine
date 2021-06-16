@@ -39,7 +39,7 @@ export default () => {
         await db.update({ id: player._id }, player);
 
         // Log the new player in and fire off some beginning commands!
-        const token = await login(args[1], args[2]);
+        const token = await login(ctx.socket, args[1], args[2]);
         send(ctx.id, "Welcome to the game!", { token });
       } else {
         send(ctx.id, "That name is already taken or unavailable.");

@@ -67,3 +67,17 @@ export const join = (socket: MUSocket, tar: DBObj) => {
   socket.join(tar._id!);
   tar.data.channels?.forEach((channel: string) => socket.join(channel));
 };
+
+export const canEdit = (en: DBObj, tar: DBObj) => {
+  return (
+    tar.owner === en._id ||
+    flags.check(en.flags, "wizard+") ||
+    tar._id === en._id
+  );
+};
+
+export const name = (en: DBObj, tar: DBObj, bold = false) => {
+  let name = bold ? `**${tar.name}**` : tar.name;
+  if (canEdit(en, tar)) name += `(${tar._id}-${flags.codes(tar.flags)})`;
+  return name;
+};

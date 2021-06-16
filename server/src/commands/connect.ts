@@ -6,6 +6,7 @@ export default () => {
   addCmd({
     name: "connect",
     pattern: /^connect\s+(\w+)\s+(\w+)/i,
+    flags: "!connected",
     render: async (args, ctx) => {
       // Check for player
       const regex = RegExp(args[1], "i");

@@ -14,7 +14,9 @@ export const login = async (
       const { tags } = flags.set(player.flags, {}, "connected");
       player.flags = tags.trim();
       await db.update({ _id: player._id }, player);
-      join(socket, player);
+      socket.join(player._id!);
+      socket.join(player.location);
+      player.data.channels?.forEach((channel: string) => socket.join(channel));
 
       return sign(player._id!, process.env.SECRET || "");
     }

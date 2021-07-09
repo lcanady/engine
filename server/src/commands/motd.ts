@@ -10,7 +10,7 @@ export default () => {
       const motd = await readFile(path.join(__dirname, "../../text/motd.md"), {
         encoding: "utf-8",
       });
-      send(ctx.id, motd);
+      await send(ctx.id, motd);
     },
   });
 };

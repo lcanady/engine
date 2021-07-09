@@ -16,6 +16,7 @@ export default () => {
         if (token) {
           await send(ctx.id, "> **Weclome to the game**!", { token });
           await force(ctx, "motd");
+          await force(ctx, "look");
         } else {
           send(ctx.id, "Wrong Password. Permision denied.");
         }

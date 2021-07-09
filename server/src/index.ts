@@ -7,6 +7,11 @@ import {
   hooks,
   DBObj,
   Article,
+  io,
+  MUSocket,
+  Context,
+  verify,
+  flags,
 } from "@ursamu/core";
 import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -49,5 +54,30 @@ hooks.use(auth, commands);
   await loaddir(path.join(__dirname, "./plugins/"));
   await loaddir(path.join(__dirname, "./commands/"));
 })();
+
+io.on("connect", (socket: MUSocket) => {
+  socket.on("message", async (ctx: Context) => {
+    if (ctx.data.token && !socket.cid) {
+      const decoded = await verify(ctx.data.token, process.env.SECRET || "");
+      const player = await db.get(decoded.id);
+      if (player) {
+        console.log("Boom!");
+        socket.cid = player._id;
+        socket.join(ctx.id);
+        socket.join(player._id!);
+        socket.join(player.location);
+        player.data.channels?.forEach((channel: string) =>
+          socket.join(channel)
+        );
+
+        const { tags } = flags.set(player.flags, {}, "connected");
+        player.flags = tags;
+        await db.update({ _id: player._id }, player);
+
+        socket.send({ msg: "Reconnected!", data: {} });
+      }
+    }
+  });
+});
 
 server.listen(4201, () => console.log(intro));

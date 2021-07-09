@@ -2,9 +2,11 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import { Socket } from "socket.io-client";
 import TextAreaAutoResize from "react-textarea-autosize";
+import { useContext } from "react";
+import { MyContext } from "../store/store";
 
 const Input = styled(TextAreaAutoResize)`
-  min-height: 72px;
+  min-height: 32px;
   max-height: 300px;
   overflow-y: auto;
   flex-grow: 1;
@@ -12,17 +14,18 @@ const Input = styled(TextAreaAutoResize)`
   width: 100%;
   margin-bottom: 16px;
   margin-top: 16px;
-  background-color: rgba(255, 255, 255, 0.1);
-  outline: none;
+  background: rgba(47, 54, 108, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  border-radius: 5px;
   color: white;
   padding: 24px;
-  font-size: 16px;
+  font-size: 0.85rem;
   font-family: "Roboto Mono";
-  font-weight: lighter;
-  bottom: 0;
-  border: none;
+  bottom: 16px;
+
   resize: none;
-  border-radius: 2px;
+
   outline: none;
 `;
 
@@ -33,6 +36,7 @@ interface Props {
 
 const InputBox: React.FC<Props> = ({ socket, setHeight }) => {
   const [input, setInput] = useState("");
+  const { token } = useContext(MyContext);
 
   return (
     <Input
@@ -40,15 +44,18 @@ const InputBox: React.FC<Props> = ({ socket, setHeight }) => {
         setHeight(ev.currentTarget.offsetHeight);
         if (ev.key === "Enter" && !ev.shiftKey) {
           ev.preventDefault();
-          const msg = { msg: ev.currentTarget.value, data: {} };
+          const msg = { msg: input, data: { token } };
           socket?.send(msg);
 
           ev.currentTarget.value = "";
           setInput("");
-          setHeight(72);
+          setHeight(68);
         }
       }}
-      onChange={(ev) => setInput(ev.currentTarget.value)}
+      onChange={(ev) => {
+        setHeight(ev.currentTarget.offsetHeight);
+        setInput(ev.currentTarget.value);
+      }}
       value={input}
     />
   );

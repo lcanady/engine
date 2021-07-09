@@ -6,7 +6,10 @@ export default () => {
     flags: "connected",
     pattern: /^(?:s[ay]*?\s+?|")(.*)/i,
     render: async (args, ctx) => {
-      await send(ctx.id, `${ctx.player?.name} says "${args[1]}"`);
+      await send(
+        ctx.player?.location || "",
+        `${ctx.player?.name} says "${args[1]}"`
+      );
     },
   });
 };

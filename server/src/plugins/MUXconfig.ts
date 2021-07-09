@@ -1,5 +1,5 @@
-import { DB, DBObj, flags } from "@ursamu/core";
-import { db } from "..";
+import { flags } from "@ursamu/core";
+import { config, db } from "..";
 import { createEntity } from "../../utils/utils";
 
 export default async () => {
@@ -43,11 +43,16 @@ export default async () => {
   );
 
   // Make sure initial room has been created.  Should only fire at first creation of db file.
-  const rooms = await db.find({
-    $where: function () {
-      return this.flags.includes("room");
-    },
-  });
+  const items = await db.find({});
+  const rooms = items.filter((item) => item.flags.includes("room"));
+  const players = items.filter((item) => item.flags.includes("player"));
+  if (players) config.set("superuser", false);
+
+  for (const player of players) {
+    const { tags } = flags.set(player.flags || "", {}, "!connected");
+    player.flags = tags;
+    await db.update({ _id: player._id }, player);
+  }
 
   if (!rooms.length) {
     const room = await createEntity("Limbo", "room");

@@ -6,12 +6,15 @@ import gfm from "remark-gfm";
 import { Context, MyContext, MyContextInterface } from "../store/store";
 import InputBox from "../components/Input";
 import Look from "../components/Look";
+import backgrounds from "../assets/background.png";
 
 const Wrapper = styled.div`
   height: 100vh;
-  background-color: black;
+  background-image: url(${backgrounds});
+  background-repeat: no-repeat;
+  background-size: cover;
   font-family: "Roboto Mono", monospace;
-  font-weight: lighter;
+
   color: white;
   justify-content: center;
   padding: 14px;
@@ -22,8 +25,7 @@ const Wrapper = styled.div`
 `;
 
 const Container = styled.div`
-  width: 60%;
-  max-width: 1024px;
+  width: 771px;
 
   @media only screen and (max-width: 1024px) {
     width: 100%;
@@ -39,10 +41,16 @@ const Output = styled.div<OutputProps>`
   flex-direction: column-reverse;
   flex-shrink: 1;
   height: calc(100vh - ${({ height }) => height}px - 100px);
-  margin-top: 56px;
+  margin-top: auto;
   overflow-y: overlay;
   * {
     overflow-anchor: none;
+  }
+
+  h2 {
+    font-size: 0.9rem;
+    margin-left: 8px;
+    margin-bottom: 8px;
   }
 
   p {
@@ -67,26 +75,37 @@ const Output = styled.div<OutputProps>`
 `;
 
 const Client = () => {
-  const { msgs, addMsg, setToken } =
+  const { msgs, addMsg, setToken, token } =
     useContext<Partial<MyContextInterface>>(MyContext);
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [height, setHeight] = useState(72);
+  const [height, setHeight] = useState(68);
 
   useEffect(() => {
     const connect = () => {
-      const socket = io("http://localhost:4201", { transports: ["websocket"] });
-      socket.on("connect", () =>
-        socket.send({ msg: "connect Foobar animefan", data: {} })
-      );
+      const socket = io("http://10.0.0.244:4201", {
+        transports: ["websocket"],
+      });
+      socket.on("connect", () => {
+        const localToken = sessionStorage.getItem("token") || "";
+        if (localToken) {
+          setToken!(localToken);
+          socket.send({ msg: "", data: { token: localToken } });
+          console.log("connected!", localToken);
+        }
+      });
       socket.on("message", (data: Context) => {
         addMsg!((v) => [data, ...v]);
-        if (data.data.token) setToken!(data.data.token);
+        if (data.data.token) {
+          console.log(data.data.token);
+          sessionStorage.setItem("token", data.data.token);
+          setToken!(data.data.token);
+        }
       });
 
       setSocket(socket);
     };
-    connect();
-  }, [addMsg, setToken]);
+    if (!socket) connect();
+  }, [addMsg, setToken, socket, token]);
 
   return (
     <Wrapper>
@@ -95,7 +114,7 @@ const Client = () => {
           {msgs?.map((ctx, i) => {
             switch (ctx.data.type) {
               case "look":
-                return <Look ctx={ctx} />;
+                return <Look ctx={ctx} key={i} />;
               default:
                 return (
                   <ReactMarkdown remarkPlugins={[gfm]} key={i}>

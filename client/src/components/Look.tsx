@@ -17,8 +17,8 @@ interface ImageProps {
 const Image = styled.div<ImageProps>`
   width: 100%;
   height: 30vh;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 70.66%, black 100%),
-    url(${({ url }) => url});
+  margin: 16px 0;
+  background: url(${({ url }) => url});
   background-position: center;
   background-size: cover;
 `;

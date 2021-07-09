@@ -1,5 +1,4 @@
 import { addCmd, broadcast } from "@ursamu/core";
-import { spawn } from "child_process";
 
 export default () =>
   addCmd({
@@ -7,8 +6,9 @@ export default () =>
     pattern: /^@reboot/i,
     flags: "connected wizard+",
     render: async (args, ctx) => {
-      broadcast(
+      await broadcast(
         `**Game:** Reboot initiated by ${ctx.player?.name}.  Please hold!`
       );
+      process.exit(0);
     },
   });

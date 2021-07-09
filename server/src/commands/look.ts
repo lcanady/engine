@@ -14,10 +14,15 @@ export default () => {
       const tar = await target(ctx.player!, args[1] || "here");
       let contents: DBObj[] = [];
       if (tar) {
-        tarName = name(ctx.player!, tar, true) + "\n\n-----\n\n";
+        tarName = name(ctx.player!, tar, true) + "\n\n";
         contents = await db.find({ location: tar._id });
-
-        desc += tarName;
+        contents = contents.filter((item) =>
+          (item.flags.includes("player") && item.flags.includes("connected")) ||
+          !item.flags.includes("player")
+            ? true
+            : false
+        );
+        desc += "## " + tarName;
         desc += `\n\n${tar.description}`;
         if (contents.length) {
           desc += tar.flags.includes("room")

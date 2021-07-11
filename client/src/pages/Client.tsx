@@ -8,6 +8,7 @@ import InputBox from "../components/Input";
 import Look from "../components/Look";
 import backgrounds from "../assets/background.png";
 import PoseBox from "../components/PoseBox";
+import { HelpTopics } from "../components/Help";
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -112,6 +113,8 @@ const Client = () => {
               case "self":
                 setFlags!(ctx.data.flags);
                 return false;
+              case "helpTopics":
+                return <HelpTopics topics={ctx.data.topics} />;
               default:
                 return (
                   <ReactMarkdown remarkPlugins={[gfm]} key={i}>

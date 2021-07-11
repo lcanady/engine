@@ -12,6 +12,7 @@ import {
   Context,
   verify,
   flags,
+  send,
 } from "@ursamu/core";
 import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -61,7 +62,6 @@ io.on("connect", (socket: MUSocket) => {
       const decoded = await verify(ctx.data.token, process.env.SECRET || "");
       const player = await db.get(decoded.id);
       if (player) {
-        console.log("Boom!");
         socket.cid = player._id;
         socket.join(ctx.id);
         socket.join(player._id!);
@@ -69,6 +69,11 @@ io.on("connect", (socket: MUSocket) => {
         player.data.channels?.forEach((channel: string) =>
           socket.join(channel)
         );
+        await send(socket.id, "", {
+          type: "self",
+          id: player._id,
+          flags: player.flags,
+        });
 
         const { tags } = flags.set(player.flags, {}, "connected");
         player.flags = tags;

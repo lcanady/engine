@@ -4,19 +4,21 @@ import { Socket } from "socket.io-client";
 import TextAreaAutoResize from "react-textarea-autosize";
 import { useContext } from "react";
 import { MyContext } from "../store/store";
+import { useRef } from "react";
 
 const Input = styled(TextAreaAutoResize)`
-  min-height: 32px;
+  min-height: 68px;
   max-height: 300px;
   overflow-y: auto;
   flex-grow: 1;
   flex-shrink: 0;
-  width: 100%;
-  margin-bottom: 16px;
+  width: 770px;
+  position: fixed;
+  bottom: 16;
   margin-top: 16px;
   background: rgba(47, 54, 108, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(30px);
+
   border-radius: 5px;
   color: white;
   padding: 24px;
@@ -27,6 +29,10 @@ const Input = styled(TextAreaAutoResize)`
   resize: none;
 
   outline: none;
+
+  @media only screen and (max-width: 1024px) {
+    width: calc(100vw - 32px);
+  }
 `;
 
 interface Props {
@@ -36,10 +42,12 @@ interface Props {
 
 const InputBox: React.FC<Props> = ({ socket, setHeight }) => {
   const [input, setInput] = useState("");
+  const ref = useRef<HTMLTextAreaElement | null>(null);
   const { token } = useContext(MyContext);
 
   return (
     <Input
+      ref={ref}
       onKeyDown={(ev) => {
         setHeight(ev.currentTarget.offsetHeight);
         if (ev.key === "Enter" && !ev.shiftKey) {
@@ -52,6 +60,7 @@ const InputBox: React.FC<Props> = ({ socket, setHeight }) => {
           setHeight(68);
         }
       }}
+      onHeightChange={() => setHeight(ref.current!.offsetHeight)}
       onChange={(ev) => {
         setHeight(ev.currentTarget.offsetHeight);
         setInput(ev.currentTarget.value);

@@ -7,6 +7,7 @@ import { Context, MyContext, MyContextInterface } from "../store/store";
 import InputBox from "../components/Input";
 import Look from "../components/Look";
 import backgrounds from "../assets/background.png";
+import PoseBox from "../components/PoseBox";
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -26,22 +27,22 @@ const Wrapper = styled.div`
 
 const Container = styled.div`
   width: 771px;
-
+  height: 100vh;
   @media only screen and (max-width: 1024px) {
     width: 100%;
   }
 `;
 
 interface OutputProps {
-  height: number;
+  ht: number;
 }
 const Output = styled.div<OutputProps>`
   width: 100%;
   display: flex;
   flex-direction: column-reverse;
   flex-shrink: 1;
-  height: calc(100vh - ${({ height }) => height}px - 100px);
-  margin-top: auto;
+  height: calc(100vh - ${({ ht }) => ht}px - 40px);
+
   overflow-y: overlay;
   * {
     overflow-anchor: none;
@@ -49,18 +50,7 @@ const Output = styled.div<OutputProps>`
 
   h2 {
     font-size: 0.9rem;
-    margin-left: 8px;
     margin-bottom: 8px;
-  }
-
-  p {
-    margin-top: 4px;
-    margin-left: 8px;
-    margin-bottom: 4px;
-    a {
-      color: white;
-      font-weight: bold;
-    }
   }
 
   blockquote {
@@ -75,10 +65,10 @@ const Output = styled.div<OutputProps>`
 `;
 
 const Client = () => {
-  const { msgs, addMsg, setToken, token } =
+  const { msgs, addMsg, setToken, token, setFlags } =
     useContext<Partial<MyContextInterface>>(MyContext);
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [height, setHeight] = useState(68);
+  const [height, setHeight] = useState(100);
 
   useEffect(() => {
     const connect = () => {
@@ -110,11 +100,18 @@ const Client = () => {
   return (
     <Wrapper>
       <Container>
-        <Output height={height}>
+        <Output ht={height}>
           {msgs?.map((ctx, i) => {
             switch (ctx.data.type) {
               case "look":
                 return <Look ctx={ctx} key={i} />;
+              case "say":
+                return <PoseBox ctx={ctx} key={i} />;
+              case "pose":
+                return <PoseBox ctx={ctx} key={i} />;
+              case "self":
+                setFlags!(ctx.data.flags);
+                return false;
               default:
                 return (
                   <ReactMarkdown remarkPlugins={[gfm]} key={i}>

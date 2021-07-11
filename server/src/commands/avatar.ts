@@ -1,10 +1,21 @@
-import { addCmd, DB, flags, send } from "@ursamu/core";
+import { addCmd, addText, DB, flags, send } from "@ursamu/core";
 import { db } from "..";
 import { target } from "../../utils/utils";
 
 export default () => {
+  addText("help", {
+    name: "@avatar",
+    category: "help",
+    body: `
+# @avatar
+SYNTAX: @avatar <tafget>=<url>
+
+Add an avatar image from a valid URL to an in-game object.
+  `.trim(),
+  });
+
   addCmd({
-    name: "avatar",
+    name: "@avatar",
     pattern: /^[@\+]?av[atar]*\s+(\w+)\s*=\s*(.*)/i,
     flags: "connected",
     render: async (args, ctx) => {
@@ -18,10 +29,10 @@ export default () => {
           db.update({ _id: tar._id }, tar);
           send(ctx.id, `Done. ${tar.name}'s avatar image has been set! `);
         } else {
-          send(ctx.id, "I can't find that player.");
+          send(ctx.id, "I can't find that.");
         }
       } else {
-        send(ctx.id, "I can't find that player.");
+        send(ctx.id, "I can't find that.");
       }
     },
   });

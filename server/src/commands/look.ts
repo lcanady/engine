@@ -22,24 +22,29 @@ export default () => {
             ? true
             : false
         );
-        desc += "## " + tarName;
-        desc += `\n\n${tar.description}`;
-        if (contents.length) {
-          desc += tar.flags.includes("room")
-            ? "\n\nContents:"
-            : "\n\nCarrying:";
-          desc += contents
-            .map((item) => "\n\n" + name(ctx.player!, item))
-            .join("");
+        let items = [];
+        for (let item of contents) {
+          items.push({
+            name: name(ctx.player!, item),
+            id: item._id,
+            desc: item.description,
+            shortdesc: item.data.shortdesc,
+            avatar: item.data.avatar,
+            flags: item.flags,
+          });
         }
-      } else {
-        desc = "I can't find that here.";
-      }
 
-      send(ctx.id, desc + "\n\n", {
-        type: "look",
-        avatar: tar?.data.avatar || "",
-      });
+        await send(ctx.id, "", {
+          type: "look",
+          desc: tar.description,
+          name: name(ctx.player!, tar),
+          avatar: tar.data.avatar,
+          items,
+          flags: tar.flags,
+        });
+      } else {
+        await send(ctx.id, "I don't see that here.");
+      }
     },
   });
 };

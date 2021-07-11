@@ -1,4 +1,12 @@
-import { compare, Data, DBObj, flags, MUSocket, sign } from "@ursamu/core";
+import {
+  compare,
+  Data,
+  DBObj,
+  flags,
+  MUSocket,
+  send,
+  sign,
+} from "@ursamu/core";
 import { db } from "../src";
 
 export const login = async (
@@ -17,7 +25,11 @@ export const login = async (
       socket.join(player._id!);
       socket.join(player.location);
       player.data.channels?.forEach((channel: string) => socket.join(channel));
-
+      await send(socket.id, "", {
+        type: "self",
+        id: player._id,
+        flags: player.flags,
+      });
       return sign(player._id!, process.env.SECRET || "");
     }
   }

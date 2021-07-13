@@ -3,6 +3,8 @@ import bg from "../assets/background.png";
 import city from "../assets/city.png";
 import lines from "../assets/home-lines.png";
 import buttonBg from "../assets/buttonbg.png";
+import SysMenu from "../components/SysMenu";
+import { MenuItem, Menu } from "../components/Menu";
 
 const Wrapper = styled.div`
   width: 100%;
@@ -89,6 +91,35 @@ const Home = () => {
           <p>Velocity</p>
         </Title>
         <Lines />
+        <SysMenu>
+          <Menu>
+            <MenuItem active>
+              <a href="/">/..</a>
+            </MenuItem>
+            <MenuItem>
+              <a href="#">/archive</a>
+              <Menu>
+                <MenuItem>
+                  <a href="#">/article1</a>
+                </MenuItem>
+                <MenuItem>
+                  <a href="#">/article2</a>
+                </MenuItem>
+                <MenuItem active>
+                  <a href="#">/admin</a>
+                  <Menu>
+                    <MenuItem>
+                      <a href="#">create.sh</a>
+                    </MenuItem>
+                  </Menu>
+                </MenuItem>
+              </Menu>
+            </MenuItem>
+            <MenuItem>
+              <a href="/client">/game</a>
+            </MenuItem>
+          </Menu>
+        </SysMenu>
         <Intro>
           <h1>Something About Retro Future</h1>
           <p>

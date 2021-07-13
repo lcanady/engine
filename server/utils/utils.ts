@@ -45,7 +45,7 @@ export const target = async (enactor: DBObj, tar: string) => {
       return (
         await db.find({
           $where: function () {
-            if (this.name.toLowerCase() === tar || this._id === tar) {
+            if (this.name.toLowerCase() === tar.trim() || this._id === tar) {
               return true;
             }
             return false;

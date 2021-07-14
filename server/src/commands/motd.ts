@@ -1,4 +1,4 @@
-import { addCmd, send } from "@ursamu/core";
+import { addCmd, send, textDB } from "@ursamu/core";
 import { readFile } from "fs/promises";
 import path from "path";
 export default () => {
@@ -7,10 +7,10 @@ export default () => {
     pattern: /^motd/i,
     flags: "connected",
     render: async (args, ctx) => {
-      const motd = await readFile(path.join(__dirname, "../../text/motd.md"), {
-        encoding: "utf-8",
-      });
-      await send(ctx.id, motd);
+      const motd = await textDB
+        .get("text")
+        ?.find((file) => file.name === "motd")?.body;
+      await send(ctx.id, motd!);
     },
   });
 };

@@ -82,11 +82,9 @@ const Lines = styled.div`
 `;
 
 const SysMsg = styled.div`
-  margin: 8px;
-  background-color: rgba(15, 12, 35, 0.5);
   font-family: "Roboto Mono";
   font-size: 0.85rem;
-  backdrop-filter: blur(5px);
+  margin-left: 8px;
 `;
 
 const Client = () => {

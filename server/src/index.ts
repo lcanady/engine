@@ -13,6 +13,8 @@ import {
   verify,
   flags,
   send,
+  textDB,
+  broadcastTo,
 } from "@ursamu/core";
 import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -20,6 +22,8 @@ import charRoutes from "./routes/charRoutes";
 import dotenv from "dotenv";
 import commands from "./hooks/commands";
 import auth from "./hooks/auth";
+import { readFile } from "fs/promises";
+import { Dirent, PathLike } from "fs";
 
 dotenv.config();
 
@@ -52,8 +56,17 @@ hooks.use(auth, commands);
 
 // load plugins
 (async () => {
-  await loaddir(path.join(__dirname, "./plugins/"));
   await loaddir(path.join(__dirname, "./commands/"));
+  await loaddir(
+    path.join(__dirname, "../text/"),
+    async (file: Dirent, path: PathLike) => {
+      const text = await readFile(`${path}/${file.name}`, { encoding: "utf8" });
+      textDB.set("text", [
+        { name: file.name.split(".")[0], category: "text", body: text },
+      ]);
+    }
+  );
+  await loaddir(path.join(__dirname, "./plugins/"));
 })();
 
 io.on("connect", (socket: MUSocket) => {
@@ -65,6 +78,8 @@ io.on("connect", (socket: MUSocket) => {
         socket.cid = player._id;
         socket.join(ctx.id);
         socket.join(player._id!);
+
+        await broadcastTo(player.location, `${player.name} has reconnected.`);
         socket.join(player.location);
         player.data.channels?.forEach((channel: string) =>
           socket.join(channel)
@@ -78,8 +93,19 @@ io.on("connect", (socket: MUSocket) => {
         const { tags } = flags.set(player.flags, {}, "connected");
         player.flags = tags;
         await db.update({ _id: player._id }, player);
-
         socket.send({ msg: "Reconnected!", data: {} });
+      }
+    }
+  });
+
+  socket.on("disconnect", async () => {
+    if (socket.cid) {
+      const player = await db.get(socket.cid);
+      if (player) {
+        await broadcastTo(player.location, `${player.name} has disconnected.`);
+        const { tags } = flags.set(player.flags, {}, "!connected");
+        player.flags = tags;
+        db.update({ _id: player._id }, player);
       }
     }
   });

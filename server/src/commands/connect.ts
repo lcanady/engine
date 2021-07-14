@@ -1,6 +1,6 @@
 import { addCmd, force, DB, DBObj, send, io, flags } from "@ursamu/core";
 import { db } from "..";
-import { join, login } from "../../utils/utils";
+import { login } from "../../utils/utils";
 
 export default () => {
   addCmd({
@@ -10,10 +10,11 @@ export default () => {
     render: async (args, ctx) => {
       // Check for player
       const regex = RegExp(args[1], "i");
-      const player = (await db.find({ name: regex }))[0];
+
+      const { token, player } = await login(ctx.socket, args[1], args[2]);
       if (player) {
-        const token = await login(ctx.socket, args[1], args[2]);
         if (token) {
+          ctx.player = player;
           await send(ctx.id, "> **Weclome to the game**!", { token });
           await force(ctx, "motd");
           await force(ctx, "look");

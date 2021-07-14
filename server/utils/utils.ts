@@ -1,4 +1,5 @@
 import {
+  broadcastTo,
   compare,
   Data,
   DBObj,
@@ -19,9 +20,14 @@ export const login = async (
   if (player) {
     if (compare(password, player.password || "")) {
       socket.cid = player._id;
-      const { tags } = flags.set(player.flags, {}, "connected");
-      player.flags = tags.trim();
+      player.flags = player.flags + " connected";
       await db.update({ _id: player._id }, player);
+      broadcastTo(player.location, `${player.name} has conencted.`, {
+        type: "connect",
+        id: player._id,
+        name: player.name,
+        flags: player.flags,
+      });
       socket.join(player._id!);
       socket.join(player.location);
       player.data.channels?.forEach((channel: string) => socket.join(channel));
@@ -30,9 +36,12 @@ export const login = async (
         id: player._id,
         flags: player.flags,
       });
-      return sign(player._id!, process.env.SECRET || "");
     }
   }
+  return {
+    token: await sign(player._id!, process.env.SECRET || ""),
+    player,
+  };
 };
 
 export const target = async (enactor: DBObj, tar: string) => {
@@ -94,4 +103,27 @@ export const name = (en: DBObj, tar: DBObj, bold = false) => {
   let name = bold ? `**${tar.name}**` : tar.name;
   if (canEdit(en, tar)) name += `(${tar._id}-${flags.codes(tar.flags)})`;
   return name;
+};
+
+export const dbObj = async (
+  tar: string,
+  flgs: string = "",
+  data: Data = {}
+) => {
+  const player = (
+    await db.find({
+      $where: function () {
+        if (this.name.toLowerCase() === tar.trim() || this._id === tar) {
+          return true;
+        }
+        return false;
+      },
+    })
+  )[0];
+
+  const { tags } = flags.set(player.flags, {}, flgs || "");
+  player.flags = tags;
+  player.data = { ...player.data, ...data };
+  await db.update({ _id: player._id }, player);
+  return player;
 };

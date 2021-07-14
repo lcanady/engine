@@ -1,8 +1,15 @@
 import styled from "@emotion/styled";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Avatar from "../components/Avatar";
 
-const Container = styled.div`
+interface ContainerProps {
+  player?: boolean;
+}
+
+const Container = styled.div<ContainerProps>`
+  display: flex;
+  flex-direction: ${({ player }) => !player && "column"};
   margin: 16px 8px;
   hr {
     margin-bottom: 16px;
@@ -38,7 +45,6 @@ interface Props {
     [key: string]: any;
   };
 }
-
 const Link = styled.a`
   p {
     color: #77abc0;
@@ -46,32 +52,41 @@ const Link = styled.a`
   }
 `;
 
-const Look: React.FC<Props> = ({ ctx }) => {
-  const { avatar } = ctx.data;
-  return (
-    <Container>
-      {avatar && <Image url={avatar} />}
+const TextContainer = styled.div``;
 
-      <h2>
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {ctx.data.name}
-        </ReactMarkdown>
-      </h2>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{ctx.data.desc}</ReactMarkdown>
-      {ctx.data.items.length && ctx.data.flags.includes("room") ? (
-        <p>Contents:</p>
+const Look: React.FC<Props> = ({ ctx }) => {
+  const { avatar, flags } = ctx.data;
+  return (
+    <Container player={!!flags.includes("player")}>
+      {avatar && flags.includes("player") ? (
+        <Avatar img={avatar} height="60px" width="60px" />
       ) : (
-        <br />
+        <Image url={avatar} />
       )}
-      {ctx.data.items.map((item: InvItem) => (
-        <Link href="#" onClick={(ev) => ev.preventDefault()}>
-          {
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {item.name}
-            </ReactMarkdown>
-          }
-        </Link>
-      ))}
+      <TextContainer>
+        <h2>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {ctx.data.name}
+          </ReactMarkdown>
+        </h2>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {ctx.data.desc}
+        </ReactMarkdown>
+        {ctx.data.items.length && ctx.data.flags.includes("room") ? (
+          <p>Contents:</p>
+        ) : (
+          <br />
+        )}
+        {ctx.data.items.map((item: InvItem) => (
+          <Link href="#" onClick={(ev) => ev.preventDefault()}>
+            {
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {item.name}
+              </ReactMarkdown>
+            }
+          </Link>
+        ))}
+      </TextContainer>
     </Container>
   );
 };

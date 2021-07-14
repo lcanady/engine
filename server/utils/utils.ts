@@ -36,7 +36,7 @@ export const login = async (
 };
 
 export const target = async (enactor: DBObj, tar: string) => {
-  switch (tar.toLowerCase()) {
+  switch (tar.toLowerCase().trim()) {
     case "me":
       return enactor;
     case "here" || "":

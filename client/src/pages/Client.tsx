@@ -9,6 +9,7 @@ import Look from "../components/Look";
 import backgrounds from "../assets/background.png";
 import PoseBox from "../components/PoseBox";
 import { HelpTopics } from "../components/Help";
+import lines from "../assets/client-lines.png";
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -27,7 +28,7 @@ const Wrapper = styled.div`
 `;
 
 const Container = styled.div`
-  width: 771px;
+  width: 700px;
   height: 100vh;
   @media only screen and (max-width: 1024px) {
     width: 100%;
@@ -42,7 +43,8 @@ const Output = styled.div<OutputProps>`
   display: flex;
   flex-direction: column-reverse;
   flex-shrink: 1;
-  height: calc(100vh - ${({ ht }) => ht}px - 40px);
+  margin-top: 11vh;
+  height: calc(85vh - ${({ ht }) => ht}px);
 
   overflow-y: overlay;
   * {
@@ -56,20 +58,42 @@ const Output = styled.div<OutputProps>`
 
   blockquote {
     padding: 4px 0;
-    padding-left: 4px;
+    padding-left: 16px;
 
     border-left: 1px solid rgba(255, 255, 255, 0.7);
   }
 
-  code {
+  pre {
+    background-color: rgba(15, 12, 35, 0.5);
+    font-family: "Roboto Mono";
+    font-size: 0.85rem;
+    backdrop-filter: blur(5px);
+    padding: 8px;
   }
+`;
+
+const Lines = styled.div`
+  position: absolute;
+  background-position: center;
+  background-image: url(${lines});
+  top: 58px;
+  width: 100%;
+  height: 58px;
+`;
+
+const SysMsg = styled.div`
+  margin: 8px;
+  background-color: rgba(15, 12, 35, 0.5);
+  font-family: "Roboto Mono";
+  font-size: 0.85rem;
+  backdrop-filter: blur(5px);
 `;
 
 const Client = () => {
   const { msgs, addMsg, setToken, token, setFlags } =
     useContext<Partial<MyContextInterface>>(MyContext);
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [height, setHeight] = useState(100);
+  const [height, setHeight] = useState(68);
 
   useEffect(() => {
     const connect = () => {
@@ -100,6 +124,7 @@ const Client = () => {
 
   return (
     <Wrapper>
+      <Lines />
       <Container>
         <Output ht={height}>
           {msgs?.map((ctx, i) => {
@@ -117,9 +142,11 @@ const Client = () => {
                 return <HelpTopics topics={ctx.data.topics} />;
               default:
                 return (
-                  <ReactMarkdown remarkPlugins={[gfm]} key={i}>
-                    {ctx.msg}
-                  </ReactMarkdown>
+                  <SysMsg>
+                    <ReactMarkdown remarkPlugins={[gfm]} key={i}>
+                      {ctx.msg}
+                    </ReactMarkdown>
+                  </SysMsg>
                 );
             }
           })}

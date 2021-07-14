@@ -5,7 +5,7 @@ import { join, login } from "../../utils/utils";
 export default () => {
   addCmd({
     name: "connect",
-    pattern: /^connect\s+(\w+)\s+(\w+)/i,
+    pattern: /^connect\s+([\w\.@_-]+)\s+([\w\.@]+)/i,
     flags: "!connected",
     render: async (args, ctx) => {
       // Check for player

@@ -3,10 +3,10 @@ import { addCmd, send } from "@ursamu/core";
 export default () => {
   addCmd({
     name: "print",
-    pattern: /^print\s+(.*)/i,
+    pattern: /^print\s+([\s\S]+)/i,
     flags: "connected",
     render: async (args, ctx) => {
-      send(ctx.id, `${args[1]}`);
+      send(ctx.id, args[1]);
     },
   });
 };

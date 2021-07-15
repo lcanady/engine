@@ -10,7 +10,7 @@ export default async (ctx: Context) => {
           if (!cmd.flags || flags.check(ctx.player?.flags || "", cmd.flags)) {
             await cmd.render(match, ctx);
             ctx.data.found = true;
-            if (ctx.player) {
+            if (ctx.player && !ctx.data.noUpdate) {
               ctx.player.temp.lastCommand = Date.now();
               await db.update({ _id: ctx.player._id }, ctx.player);
             }

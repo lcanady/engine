@@ -3,13 +3,14 @@ import { useContext, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { io, Socket } from "socket.io-client";
 import gfm from "remark-gfm";
-import { Context, MyContext, MyContextInterface } from "../store/store";
+import { Context, MyContext } from "../store/store";
 import InputBox from "../components/Input";
-import Look from "../components/Look";
+import Look, { InvItem } from "../components/Look";
 import backgrounds from "../assets/background.png";
 import PoseBox from "../components/PoseBox";
 import { HelpTopics } from "../components/Help";
 import lines from "../assets/client-lines.png";
+import { SideContents } from "../components/Contents";
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -28,8 +29,9 @@ const Wrapper = styled.div`
 `;
 
 const Container = styled.div`
-  width: 700px;
+  width: 800px;
   height: 100vh;
+  margin-left: auto;
   @media only screen and (max-width: 1024px) {
     width: 100%;
   }
@@ -76,7 +78,7 @@ const Lines = styled.div`
   position: absolute;
   background-position: center;
   background-image: url(${lines});
-  top: 58px;
+  top: 80px;
   width: 100%;
   height: 58px;
 `;
@@ -87,11 +89,27 @@ const SysMsg = styled.div`
   margin-left: 8px;
 `;
 
+const ListWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  max-width: 1440px;
+`;
+
 const Client = () => {
-  const { msgs, addMsg, setToken, token, setFlags } =
-    useContext<Partial<MyContextInterface>>(MyContext);
+  const {
+    msgs,
+    addMsg,
+    setToken,
+    token,
+    setFlags,
+    setContents,
+    contents,
+    flags,
+  } = useContext(MyContext);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [height, setHeight] = useState(68);
+  const [inter, setInter] = useState<NodeJS.Timeout>();
+  const [items, setItems] = useState<InvItem[]>([]);
 
   useEffect(() => {
     const connect = () => {
@@ -103,57 +121,101 @@ const Client = () => {
         if (localToken) {
           setToken!(localToken);
           socket.send({ msg: "", data: { token: localToken } });
-          console.log("connected!", localToken);
-        }
-      });
-      socket.on("message", (data: Context) => {
-        addMsg!((v) => [data, ...v]);
-        if (data.data.token) {
-          console.log(data.data.token);
-          sessionStorage.setItem("token", data.data.token);
-          setToken!(data.data.token);
         }
       });
 
+      socket.on("message", (data: Context) => {
+        addMsg!((v) => [data, ...v]);
+        if (data.data.token) {
+          sessionStorage.setItem("token", data.data.token);
+          setToken!(data.data.token);
+          setInter(
+            setInterval(() => {
+              socket?.send({
+                msg: "@update",
+                data: { token },
+              });
+            }, 1000)
+          );
+        }
+
+        if (data.data.loggedIn) {
+          console.log("Foobar");
+          setInter(
+            setInterval(() => {
+              socket?.send({
+                msg: "@update",
+                data: { token },
+              });
+            }, 1000)
+          );
+        }
+
+        if (data.data.type === "contents") setItems(data.data.contents);
+      });
+
+      socket.io.on("reconnect", () =>
+        setInter(
+          setInterval(() => {
+            socket?.send({
+              msg: "@update",
+              data: { token },
+            });
+          }, 3000)
+        )
+      );
+
+      socket.on("disconnect", () => clearInterval(inter!));
+
       setSocket(socket);
     };
+
     if (!socket) connect();
-  }, [addMsg, setToken, socket, token]);
+
+    return () => clearInterval(inter!);
+  }, [addMsg, setToken, socket, token, contents, setContents, inter]);
 
   return (
     <Wrapper>
       <Lines />
-      <Container>
-        <Output ht={height}>
-          {msgs?.map((ctx, i) => {
-            switch (ctx.data.type) {
-              case "look":
-                return <Look ctx={ctx} key={i} />;
-              case "say":
-                return <PoseBox ctx={ctx} key={i} />;
-              case "pose":
-                return <PoseBox ctx={ctx} key={i} />;
-              case "self":
-                setFlags!(ctx.data.flags);
-                return false;
-              case "helpTopics":
-                return <HelpTopics topics={ctx.data.topics} />;
-              default:
-                return (
-                  <SysMsg>
-                    <ReactMarkdown remarkPlugins={[gfm]} key={i}>
-                      {ctx.msg}
-                    </ReactMarkdown>
-                  </SysMsg>
-                );
-            }
-          })}
-          <div
-            style={{ overflowAnchor: "auto", width: "100%", minHeight: "3px" }}
-          ></div>
-        </Output>
-        <InputBox socket={socket} setHeight={setHeight} />
-      </Container>
+      <ListWrapper>
+        <Container>
+          <Output ht={height}>
+            {msgs?.map((ctx, i) => {
+              switch (ctx.data.type) {
+                case "look":
+                  return <Look ctx={ctx} key={i} />;
+                case "say":
+                  return <PoseBox ctx={ctx} key={i} />;
+                case "pose":
+                  return <PoseBox ctx={ctx} key={i} />;
+                case "self":
+                  setFlags!(ctx.data.flags);
+                  return false;
+                case "helpTopics":
+                  return <HelpTopics topics={ctx.data.topics} />;
+                default:
+                  return (
+                    <SysMsg>
+                      <ReactMarkdown remarkPlugins={[gfm]} key={i}>
+                        {ctx.msg}
+                      </ReactMarkdown>
+                    </SysMsg>
+                  );
+              }
+            })}
+            <div
+              style={{
+                overflowAnchor: "auto",
+                width: "100%",
+                minHeight: "3px",
+              }}
+            ></div>
+          </Output>
+          <InputBox socket={socket} setHeight={setHeight} />
+        </Container>
+        <SideContents items={items} />
+      </ListWrapper>
     </Wrapper>
   );
 };

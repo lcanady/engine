@@ -6,7 +6,8 @@ import { useContext } from "react";
 
 const Wrapper = styled.div`
   display: flex;
-  padding-bottom: 16px;
+
+  padding: 16px 0;
   margin-left: 8px;
 `;
 const TextBlock = styled.div`

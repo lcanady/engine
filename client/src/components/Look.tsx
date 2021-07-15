@@ -21,12 +21,14 @@ interface ImageProps {
   url: string;
 }
 
-interface InvItem {
+export interface InvItem {
   name: string;
   desc: string;
   id: string;
-  avatar: string;
+  avatar?: string;
   flags: string;
+  shortdesc?: string;
+  idle?: number;
 }
 
 const Image = styled.div<ImageProps>`

@@ -77,10 +77,12 @@ io.on("connect", (socket: MUSocket) => {
       if (player) {
         socket.cid = player._id;
         socket.join(ctx.id);
+
         socket.join(player._id!);
 
         await broadcastTo(player.location, `${player.name} has reconnected.`);
         socket.join(player.location);
+
         player.data.channels?.forEach((channel: string) =>
           socket.join(channel)
         );
@@ -89,6 +91,7 @@ io.on("connect", (socket: MUSocket) => {
           id: player._id,
           flags: player.flags,
         });
+        await send(socket.id, "", { loggedIn: true });
 
         const { tags } = flags.set(player.flags, {}, "connected");
         player.flags = tags;

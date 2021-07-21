@@ -5,33 +5,16 @@ import { io, Socket } from "socket.io-client";
 import gfm from "remark-gfm";
 import { Context, MyContext } from "../store/store";
 import InputBox from "../components/Input";
-import Look, { InvItem } from "../components/Look";
-import backgrounds from "../assets/background.png";
 import PoseBox from "../components/PoseBox";
 import { HelpTopics } from "../components/Help";
-import lines from "../assets/client-lines.png";
-import { SideContents } from "../components/Contents";
-
-const Wrapper = styled.div`
-  height: 100vh;
-  background-image: url(${backgrounds});
-  background-repeat: no-repeat;
-  background-size: cover;
-  font-family: "Roboto Mono", monospace;
-
-  color: white;
-  justify-content: center;
-  padding: 14px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
+import Look from "../components/Look";
+import { Layout } from "../components/Layout";
 
 const Container = styled.div`
-  width: 800px;
+  display: block;
+  width: 960px;
   height: 100vh;
-  margin-left: auto;
+
   @media only screen and (max-width: 1024px) {
     width: 100%;
   }
@@ -42,15 +25,23 @@ interface OutputProps {
 }
 const Output = styled.div<OutputProps>`
   width: 100%;
+  position: fixed;
   display: flex;
   flex-direction: column-reverse;
   flex-shrink: 1;
-  margin-top: 11vh;
-  height: calc(85vh - ${({ ht }) => ht}px);
+  margin-top: 280px;
+  bottom: 130px;
+  width: 960px;
+  height: calc(75% - ${({ ht }) => ht}px);
 
   overflow-y: overlay;
   * {
     overflow-anchor: none;
+  }
+
+  @media only screen and (max-width: 1024px) {
+    width: 100%;
+    padding: 0 24px;
   }
 
   h2 {
@@ -74,42 +65,17 @@ const Output = styled.div<OutputProps>`
   }
 `;
 
-const Lines = styled.div`
-  position: absolute;
-  background-position: center;
-  background-image: url(${lines});
-  top: 80px;
-  width: 100%;
-  height: 58px;
-`;
-
 const SysMsg = styled.div`
   font-family: "Roboto Mono";
   font-size: 0.85rem;
   margin-left: 8px;
 `;
 
-const ListWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  max-width: 1440px;
-`;
-
 const Client = () => {
-  const {
-    msgs,
-    addMsg,
-    setToken,
-    token,
-    setFlags,
-    setContents,
-    contents,
-    flags,
-  } = useContext(MyContext);
+  const { msgs, addMsg, setToken, token, setFlags, setContents, contents } =
+    useContext(MyContext);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [height, setHeight] = useState(68);
-  const [inter, setInter] = useState<NodeJS.Timeout>();
-  const [items, setItems] = useState<InvItem[]>([]);
 
   useEffect(() => {
     const connect = () => {
@@ -129,94 +95,56 @@ const Client = () => {
         if (data.data.token) {
           sessionStorage.setItem("token", data.data.token);
           setToken!(data.data.token);
-          setInter(
-            setInterval(() => {
-              socket?.send({
-                msg: "@update",
-                data: { token },
-              });
-            }, 1000)
-          );
         }
-
-        if (data.data.loggedIn) {
-          console.log("Foobar");
-          setInter(
-            setInterval(() => {
-              socket?.send({
-                msg: "@update",
-                data: { token },
-              });
-            }, 1000)
-          );
-        }
-
-        if (data.data.type === "contents") setItems(data.data.contents);
       });
 
-      socket.io.on("reconnect", () =>
-        setInter(
-          setInterval(() => {
-            socket?.send({
-              msg: "@update",
-              data: { token },
-            });
-          }, 3000)
-        )
-      );
-
-      socket.on("disconnect", () => clearInterval(inter!));
+      socket.io.on("close", () => console.log("Socket Closed!"));
 
       setSocket(socket);
     };
 
     if (!socket) connect();
-
-    return () => clearInterval(inter!);
-  }, [addMsg, setToken, socket, token, contents, setContents, inter]);
+  }, [addMsg, setToken, socket, token, contents, setContents]);
 
   return (
-    <Wrapper>
-      <Lines />
-      <ListWrapper>
-        <Container>
-          <Output ht={height}>
-            {msgs?.map((ctx, i) => {
-              switch (ctx.data.type) {
-                case "look":
-                  return <Look ctx={ctx} key={i} />;
-                case "say":
-                  return <PoseBox ctx={ctx} key={i} />;
-                case "pose":
-                  return <PoseBox ctx={ctx} key={i} />;
-                case "self":
-                  setFlags!(ctx.data.flags);
-                  return false;
-                case "helpTopics":
-                  return <HelpTopics topics={ctx.data.topics} />;
-                default:
-                  return (
-                    <SysMsg>
-                      <ReactMarkdown remarkPlugins={[gfm]} key={i}>
-                        {ctx.msg}
-                      </ReactMarkdown>
-                    </SysMsg>
-                  );
-              }
-            })}
-            <div
-              style={{
-                overflowAnchor: "auto",
-                width: "100%",
-                minHeight: "3px",
-              }}
-            ></div>
-          </Output>
-          <InputBox socket={socket} setHeight={setHeight} />
-        </Container>
-        <SideContents items={items} />
-      </ListWrapper>
-    </Wrapper>
+    <Layout index={0}>
+      <Container>
+        <Output ht={height}>
+          {msgs?.map((ctx, i) => {
+            switch (ctx.data.type) {
+              case "look":
+                return <Look ctx={ctx} key={i} />;
+              case "say":
+                return <PoseBox ctx={ctx} key={i} />;
+              case "pose":
+                return <PoseBox ctx={ctx} key={i} />;
+              case "self":
+                setFlags!(ctx.data.flags);
+                return false;
+              case "helpTopics":
+                return <HelpTopics topics={ctx.data.topics} />;
+              default:
+                return (
+                  <SysMsg>
+                    <ReactMarkdown remarkPlugins={[gfm]} key={i}>
+                      {ctx.msg}
+                    </ReactMarkdown>
+                  </SysMsg>
+                );
+            }
+          })}
+          <div
+            style={{
+              display: "block",
+              overflowAnchor: "auto",
+              width: "100%",
+              minHeight: "3px",
+            }}
+          ></div>
+        </Output>
+      </Container>
+      <InputBox socket={socket} setHeight={setHeight} />
+    </Layout>
   );
 };
 

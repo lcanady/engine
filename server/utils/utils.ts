@@ -127,3 +127,15 @@ export const dbObj = async (
   await db.update({ _id: player._id }, player);
   return player;
 };
+
+export const idle = (secs: number) => {
+  const curr = Date.now();
+  const past = secs;
+  secs = Math.floor((curr - secs) / 1000);
+  const mins = Math.floor((curr - past) / (1000 * 60));
+  const hrs = Math.floor((curr - past) / (1000 * 60 * 60));
+
+  if (hrs) return hrs + "h";
+  if (mins) return mins + "m";
+  return secs + "s";
+};

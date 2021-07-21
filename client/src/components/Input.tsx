@@ -12,7 +12,7 @@ const Input = styled(TextAreaAutoResize)`
   overflow-y: auto;
   flex-grow: 1;
   flex-shrink: 0;
-  width: 800px;
+  width: 960px;
   position: fixed;
   bottom: 16;
   margin-top: 16px;
@@ -30,8 +30,10 @@ const Input = styled(TextAreaAutoResize)`
 
   outline: none;
 
+  bottom: 56px;
   @media only screen and (max-width: 1024px) {
     width: calc(100vw - 32px);
+    margin: 0 16px;
   }
 `;
 

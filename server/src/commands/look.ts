@@ -1,6 +1,6 @@
 import { addCmd, DBObj, flags, send } from "@ursamu/core";
 import { db } from "..";
-import { canEdit, name, target } from "../../utils/utils";
+import { canEdit, idle, name, target } from "../../utils/utils";
 
 export default () => {
   addCmd({
@@ -31,6 +31,7 @@ export default () => {
             shortdesc: item.data.shortdesc,
             avatar: item.data.avatar,
             flags: item.flags,
+            idle: idle(item.temp.lastCommand),
           });
         }
 

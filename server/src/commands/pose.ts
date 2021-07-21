@@ -23,6 +23,7 @@ export default () => {
         type: "pose",
         name: ctx.player?.name,
         id: ctx.player?._id,
+        avatar: ctx.player?.data.avatar,
       });
     },
   });

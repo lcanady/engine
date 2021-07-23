@@ -31,7 +31,7 @@ export default () => {
             shortdesc: item.data.shortdesc,
             avatar: item.data.avatar,
             flags: item.flags,
-            idle: idle(item.temp.lastCommand),
+            idle: idle(item.temp.lastCommand || Date.now()),
           });
         }
 

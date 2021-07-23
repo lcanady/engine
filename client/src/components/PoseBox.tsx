@@ -31,15 +31,15 @@ const PoseBox: React.FC<Props> = ({
     data: { avatar, name, id },
   },
 }) => {
-  const { flags } = useContext(MyContext);
+  const { user } = useContext(MyContext);
   return (
     <Wrapper>
       <Avatar img={avatar} />
       <TextBlock>
         <Name>
           {name}
-          {flags?.includes("wizard") ||
-            (flags?.includes("immortal") && `(${id})`)}
+          {user?.flags?.includes("wizard") ||
+            (user?.flags?.includes("immortal") && `(${id})`)}
         </Name>
         <MD text={msg} />
       </TextBlock>

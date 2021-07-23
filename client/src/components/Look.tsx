@@ -77,29 +77,34 @@ const Look: React.FC<Props> = ({ ctx }) => {
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {ctx.data.desc}
         </ReactMarkdown>
-        <h2>Characters</h2>
-        <Table>
-          <HeaderRow>
-            <Header width="40%">Name</Header>
-            <Header width="55%">Short Desc</Header>
-            <Header width="5%" align="right">
-              Idle
-            </Header>
-          </HeaderRow>
-          {ctx.data.items.map((item: InvItem, idx: number) => (
-            <Row>
-              <Cell width="40%" style={{ color: " #77ABC0" }}>
-                {item.name}
-              </Cell>
-              <Cell width="55%">
-                {item?.shortdesc || "Type '+shortdesc <desc>' to set this."}
-              </Cell>
-              <Cell width="5%" align="right">
-                {item.idle}
-              </Cell>
-            </Row>
-          ))}
-        </Table>
+
+        {ctx.data.flags.includes("room") && (
+          <>
+            <h2>Characters</h2>
+            <Table>
+              <HeaderRow>
+                <Header width="40%">Name</Header>
+                <Header width="55%">Short Desc</Header>
+                <Header width="5%" align="right">
+                  Idle
+                </Header>
+              </HeaderRow>
+              {ctx.data.items.map((item: InvItem, idx: number) => (
+                <Row>
+                  <Cell width="40%" style={{ color: " #77ABC0" }}>
+                    {item.name}
+                  </Cell>
+                  <Cell width="55%">
+                    {item?.shortdesc || "Type '+shortdesc <desc>' to set this."}
+                  </Cell>
+                  <Cell width="5%" align="right">
+                    {item.idle}
+                  </Cell>
+                </Row>
+              ))}
+            </Table>
+          </>
+        )}
       </TextContainer>
     </Container>
   );

@@ -1,4 +1,4 @@
-import { addCmd, force, DB, DBObj, send, io, flags } from "@ursamu/core";
+import { addCmd, force, DB, DBObj, send, io, flags, conns } from "@ursamu/core";
 import { db } from "..";
 import { login } from "../../utils/utils";
 
@@ -14,6 +14,17 @@ export default () => {
       const { token, player } = await login(ctx.socket, args[1], args[2]);
       if (player) {
         if (token) {
+          conns.push(ctx.socket);
+          await send(ctx.id, "", {
+            type: "self",
+            flags: player.flags,
+            user: {
+              name: player.name,
+              flags: player.flags,
+              id: player._id,
+              avatar: player.data.avatar,
+            },
+          });
           ctx.player = player;
           await send(ctx.id, "> **Weclome to the game**!", { token });
           await force(ctx, "motd");

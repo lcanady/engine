@@ -72,7 +72,7 @@ const SysMsg = styled.div`
 `;
 
 const Client = () => {
-  const { msgs, addMsg, setToken, token, setFlags, setContents, contents } =
+  const { msgs, addMsg, setToken, token, setContents, contents, setUser } =
     useContext(MyContext);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [height, setHeight] = useState(68);
@@ -96,6 +96,10 @@ const Client = () => {
           sessionStorage.setItem("token", data.data.token);
           setToken!(data.data.token);
         }
+
+        if (data.data.type === "self") {
+          setUser!({ ...data.data.user });
+        }
       });
 
       socket.io.on("close", () => console.log("Socket Closed!"));
@@ -104,7 +108,7 @@ const Client = () => {
     };
 
     if (!socket) connect();
-  }, [addMsg, setToken, socket, token, contents, setContents]);
+  }, [addMsg, setToken, socket, token, contents, setContents, setUser]);
 
   return (
     <Layout index={0}>
@@ -118,9 +122,6 @@ const Client = () => {
                 return <PoseBox ctx={ctx} key={i} />;
               case "pose":
                 return <PoseBox ctx={ctx} key={i} />;
-              case "self":
-                setFlags!(ctx.data.flags);
-                return false;
               case "helpTopics":
                 return <HelpTopics topics={ctx.data.topics} />;
               default:

@@ -15,6 +15,9 @@ import {
   send,
   textDB,
   broadcastTo,
+  conns,
+  remConn,
+  getSocket,
 } from "@ursamu/core";
 import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -75,12 +78,15 @@ io.on("connect", (socket: MUSocket) => {
       const decoded = await verify(ctx.data.token, process.env.SECRET || "");
       const player = await db.get(decoded.id);
       if (player) {
+        if (!player.temp.lastCommand) {
+          broadcastTo(player.location, `${player.name} has connected.`);
+        }
+        conns.push(socket);
+
         socket.cid = player._id;
+
         socket.join(ctx.id);
-
         socket.join(player._id!);
-
-        await broadcastTo(player.location, `${player.name} has reconnected.`);
         socket.join(player.location);
 
         player.data.channels?.forEach((channel: string) =>
@@ -88,30 +94,54 @@ io.on("connect", (socket: MUSocket) => {
         );
         await send(socket.id, "", {
           type: "self",
-          id: player._id,
           flags: player.flags,
+          user: {
+            name: player.name,
+            flags: player.flags,
+            id: player._id,
+            avatar: player.data.avatar,
+          },
         });
-        await send(socket.id, "", { loggedIn: true });
 
         const { tags } = flags.set(player.flags, {}, "connected");
         player.flags = tags;
         await db.update({ _id: player._id }, player);
-        socket.send({ msg: "Reconnected!", data: {} });
       }
     }
-  });
-
-  socket.on("disconnect", async () => {
-    if (socket.cid) {
-      const player = await db.get(socket.cid);
-      if (player) {
-        await broadcastTo(player.location, `${player.name} has disconnected.`);
-        const { tags } = flags.set(player.flags, {}, "!connected");
-        player.flags = tags;
-        db.update({ _id: player._id }, player);
-      }
-    }
+    socket.on("disconnect", () => remConn(socket.cid || ""));
   });
 });
+
+setInterval(async () => {
+  const players = await db.find({
+    $where: function () {
+      return this.flags.includes("player");
+    },
+  });
+
+  if (players) {
+    for (const player of players) {
+      const diff = Math.round(
+        (Date.now() - player.temp.lastCommand || Date.now()) / (1000 * 3600)
+      );
+
+      const conn = conns.find((conn) => conn.cid === player._id);
+
+      if (
+        diff &&
+        player.temp.lastCommand &&
+        !conn &&
+        player.flags.includes("connected")
+      ) {
+        const { tags } = flags.set(player.flags, {}, "!connected");
+        player.flags = tags;
+        player.temp = {};
+        db.update({ _id: player._id }, player);
+        console.log(diff);
+        broadcastTo(player.location, `${player.name} has disconnected.`);
+      }
+    }
+  }
+}, 60000);
 
 server.listen(4201, () => console.log(intro));

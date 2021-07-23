@@ -48,12 +48,6 @@ export default async () => {
   const players = items.filter((item) => item.flags.includes("player"));
   if (players) config.set("superuser", false);
 
-  for (const player of players) {
-    const { tags } = flags.set(player.flags || "", {}, "!connected");
-    player.flags = tags;
-    await db.update({ _id: player._id }, player);
-  }
-
   if (!rooms.length) {
     const room = await createEntity("Limbo", "room");
     room.owner = room._id!;

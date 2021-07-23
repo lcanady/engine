@@ -21,6 +21,7 @@ export const login = async (
     if (compare(password, player.password || "")) {
       socket.cid = player._id;
       player.flags = player.flags + " connected";
+      player.temp = {};
       await db.update({ _id: player._id }, player);
       broadcastTo(player.location, `${player.name} has conencted.`, {
         type: "connect",

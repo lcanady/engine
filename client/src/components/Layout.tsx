@@ -5,6 +5,7 @@ import lines from "../assets/client-lines.png";
 import titleBG from "../assets/titleBG.png";
 import menuBG from "../assets/menuBG.png";
 import { Menu, MenuItem } from "./Menu";
+import { User } from "./User";
 
 const Wrapper = styled.div`
   background-image: url(${city});
@@ -81,8 +82,15 @@ const Lines = styled.div`
   background-repeat: no-repeat;
 `;
 
-const Right = styled.div``;
+const Right = styled.div`
+  @media only screen and (max-width: 1024px) {
+    width: 100%;
+  }
+`;
 const Left = styled.div`
+  @media only screen and (max-width: 1300px) {
+    display: none;
+  }
   position: absolute;
   top: 230px;
   left: 75px;
@@ -95,7 +103,9 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children, index }) => {
   return (
     <Wrapper>
-      <TopMenu></TopMenu>
+      <TopMenu>
+        <User />
+      </TopMenu>
       <Title>
         <p>terminal velocity</p>
       </Title>

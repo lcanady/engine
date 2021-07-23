@@ -1,6 +1,6 @@
 import { flags } from "@ursamu/core";
 import { config, db } from "..";
-import { createEntity } from "../../utils/utils";
+import { createEntity } from "../utils/utils";
 
 export default async () => {
   flags.add(

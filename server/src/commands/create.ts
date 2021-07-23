@@ -1,6 +1,6 @@
 import { addCmd, hash, send } from "@ursamu/core";
 import { config, db } from "..";
-import { createEntity, login } from "../../utils/utils";
+import { createEntity, login } from "../utils/utils";
 
 export default () => {
   addCmd({

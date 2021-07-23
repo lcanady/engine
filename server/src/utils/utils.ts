@@ -8,7 +8,7 @@ import {
   send,
   sign,
 } from "@ursamu/core";
-import { db } from "../src";
+import { db } from "..";
 
 export const login = async (
   socket: MUSocket,
@@ -20,7 +20,7 @@ export const login = async (
   if (player) {
     if (compare(password, player.password || "")) {
       socket.cid = player._id;
-      player.flags = player.flags + " connected";
+      const { tags } = flags.set(player.flags, {}, "connected");
       player.temp = {};
       await db.update({ _id: player._id }, player);
       broadcastTo(player.location, `${player.name} has conencted.`, {

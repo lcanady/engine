@@ -1,6 +1,6 @@
 import { addCmd, DBObj, flags, send } from "@ursamu/core";
 import { db } from "..";
-import { canEdit, idle, name, target } from "../../utils/utils";
+import { canEdit, idle, name, target } from "../utils/utils";
 
 export default () => {
   addCmd({

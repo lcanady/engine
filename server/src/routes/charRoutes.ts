@@ -1,6 +1,6 @@
 import { compare, DBObj, express, hash, sign } from "@ursamu/core";
 import { db } from "..";
-import { createEntity } from "../../utils/utils";
+import { createEntity } from "../utils/utils";
 
 const router: express.Router = express.Router();
 

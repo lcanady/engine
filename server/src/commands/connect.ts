@@ -1,6 +1,6 @@
 import { addCmd, force, DB, DBObj, send, io, flags, conns } from "@ursamu/core";
 import { db } from "..";
-import { login } from "../../utils/utils";
+import { login } from "../utils/utils";
 
 export default () => {
   addCmd({

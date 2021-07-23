@@ -1,6 +1,6 @@
 import { addCmd, addText, DB, flags, send } from "@ursamu/core";
 import { db } from "..";
-import { target } from "../../utils/utils";
+import { target } from "../utils/utils";
 
 export default () => {
   addText("help", {

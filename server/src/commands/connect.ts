@@ -14,7 +14,6 @@ export default () => {
       const { token, player } = await login(ctx.socket, args[1], args[2]);
       if (player) {
         if (token) {
-          conns.push(ctx.socket);
           await send(ctx.id, "", {
             type: "self",
             flags: player.flags,

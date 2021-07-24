@@ -1,4 +1,5 @@
 import React, { createContext, useState } from "react";
+import { Socket } from "socket.io-client";
 import { InvItem } from "../components/Look";
 
 interface User {
@@ -15,6 +16,8 @@ export interface Context {
 
 export interface MyContextInterface {
   user: User;
+  setSocket: React.Dispatch<React.SetStateAction<Socket | undefined>>;
+  socket: Socket | undefined;
   setUser: React.Dispatch<React.SetStateAction<User>>;
   flags: string;
   setFlags: React.Dispatch<React.SetStateAction<string>>;
@@ -34,6 +37,7 @@ const Provider: React.FC<Props> = ({ children }) => {
   const [token, setToken] = useState<string>("");
   const [flags, setFlags] = useState<string>("");
   const [contents, setContents] = useState<InvItem[]>([]);
+  const [socket, setSocket] = useState<Socket | undefined>();
   const [user, setUser] = useState<User>({
     id: "",
     flags: "",
@@ -42,6 +46,8 @@ const Provider: React.FC<Props> = ({ children }) => {
   });
 
   const initialState: MyContextInterface = {
+    socket,
+    setSocket,
     user,
     setUser,
     contents,

@@ -17,7 +17,6 @@ import {
   broadcastTo,
   conns,
   remConn,
-  getSocket,
 } from "@ursamu/core";
 import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -54,6 +53,15 @@ export const wiki = new DB<Article>(
   path.resolve(__dirname, "../../data/wiki.db")
 );
 
+export type Msg = {
+  id: string;
+  msg: string;
+  created: number;
+  data: { [key: string]: any };
+};
+
+export const msgs = new DB<Msg>(path.resolve(__dirname, "../../data/msgs.db"));
+
 // load hooks.
 hooks.use(auth, commands);
 
@@ -81,9 +89,9 @@ io.on("connect", (socket: MUSocket) => {
         if (!player.temp.lastCommand) {
           broadcastTo(player.location, `${player.name} has connected.`);
         }
-        conns.push(socket);
 
         socket.cid = player._id;
+        conns.push(socket);
 
         socket.join(ctx.id);
         socket.join(player._id!);

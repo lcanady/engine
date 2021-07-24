@@ -1,6 +1,7 @@
 import {
   broadcastTo,
   compare,
+  conns,
   Data,
   DBObj,
   flags,
@@ -20,6 +21,7 @@ export const login = async (
   if (player) {
     if (compare(password, player.password || "")) {
       socket.cid = player._id;
+      conns.push(socket);
       const { tags } = flags.set(player.flags, {}, "connected");
       player.temp = {};
       await db.update({ _id: player._id }, player);

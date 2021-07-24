@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useContext, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import gfm from "remark-gfm";
 import { Context, MyContext } from "../store/store";
 import InputBox from "../components/Input";
@@ -29,10 +29,9 @@ const Output = styled.div<OutputProps>`
   display: flex;
   flex-direction: column-reverse;
   flex-shrink: 1;
-  margin-top: 280px;
-  bottom: 130px;
+  top: 220px;
   width: 960px;
-  height: calc(75% - ${({ ht }) => ht}px);
+  height: calc(73% - ${({ ht }) => ht}px);
 
   overflow-y: overlay;
   * {
@@ -72,9 +71,17 @@ const SysMsg = styled.div`
 `;
 
 const Client = () => {
-  const { msgs, addMsg, setToken, token, setContents, contents, setUser } =
-    useContext(MyContext);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const {
+    msgs,
+    addMsg,
+    setToken,
+    token,
+    setContents,
+    contents,
+    setUser,
+    socket,
+    setSocket,
+  } = useContext(MyContext);
   const [height, setHeight] = useState(68);
 
   useEffect(() => {
@@ -104,11 +111,28 @@ const Client = () => {
 
       socket.io.on("close", () => console.log("Socket Closed!"));
 
-      setSocket(socket);
+      setSocket!(socket);
     };
 
     if (!socket) connect();
-  }, [addMsg, setToken, socket, token, contents, setContents, setUser]);
+  }, [
+    addMsg,
+    setToken,
+    socket,
+    token,
+    contents,
+    setSocket,
+    setContents,
+    setUser,
+  ]);
+
+  useEffect(() => {
+    addMsg!(JSON.parse(sessionStorage.getItem("msgs") || "[]"));
+  }, [addMsg]);
+
+  useEffect(() => {
+    if (msgs) sessionStorage.setItem("msgs", JSON.stringify(msgs));
+  }, [msgs]);
 
   return (
     <Layout index={0}>
@@ -123,11 +147,11 @@ const Client = () => {
               case "pose":
                 return <PoseBox ctx={ctx} key={i} />;
               case "helpTopics":
-                return <HelpTopics topics={ctx.data.topics} />;
+                return <HelpTopics topics={ctx.data.topics} key={i} />;
               default:
                 return (
-                  <SysMsg>
-                    <ReactMarkdown remarkPlugins={[gfm]} key={i}>
+                  <SysMsg key={i}>
+                    <ReactMarkdown remarkPlugins={[gfm]}>
                       {ctx.msg}
                     </ReactMarkdown>
                   </SysMsg>

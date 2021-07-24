@@ -1,4 +1,5 @@
 import { addCmd, send } from "@ursamu/core";
+import { msgs } from "..";
 
 export default () => {
   addCmd({
@@ -16,6 +17,20 @@ export default () => {
           avatar: ctx.player?.data.avatar,
         }
       );
+
+      delete ctx.data.token;
+
+      msgs.create({
+        created: Date.now(),
+        data: {
+          type: "say",
+          name: ctx.player?.name,
+          id: ctx.player?._id,
+          avatar: ctx.player?.data.avatar,
+        },
+        id: ctx.player?.location || "-1",
+        msg: `${ctx.player?.name} says "${args[1]}"`,
+      });
     },
   });
 };

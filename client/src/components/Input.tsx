@@ -38,12 +38,14 @@ const Input = styled(TextAreaAutoResize)`
 `;
 
 interface Props {
-  socket: Socket | null;
+  socket: Socket | undefined;
   setHeight: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const InputBox: React.FC<Props> = ({ socket, setHeight }) => {
   const [input, setInput] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+  const [count, setCount] = useState<number>(0);
   const ref = useRef<HTMLTextAreaElement | null>(null);
   const { token } = useContext(MyContext);
 
@@ -57,9 +59,21 @@ const InputBox: React.FC<Props> = ({ socket, setHeight }) => {
           const msg = { msg: input, data: { token } };
           socket?.send(msg);
 
-          ev.currentTarget.value = "";
+          setHistory([...history, ev.currentTarget.value]);
+
+          setCount(count + 1);
+
           setInput("");
           setHeight(68);
+        }
+
+        if (ev.key === "ArrowUp") {
+          ev.preventDefault();
+          console.log(count);
+          if (history.length >= 0) {
+            ev.currentTarget.value = history[count];
+            setCount(count - 1);
+          }
         }
       }}
       onHeightChange={() => setHeight(ref.current!.offsetHeight)}

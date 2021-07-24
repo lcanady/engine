@@ -90,7 +90,7 @@ const Look: React.FC<Props> = ({ ctx }) => {
                 </Header>
               </HeaderRow>
               {ctx.data.items.map((item: InvItem, idx: number) => (
-                <Row>
+                <Row key={idx}>
                   <Cell width="40%" style={{ color: " #77ABC0" }}>
                     {item.name}
                   </Cell>

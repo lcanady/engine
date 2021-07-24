@@ -67,12 +67,27 @@ const InputBox: React.FC<Props> = ({ socket, setHeight }) => {
           setHeight(68);
         }
 
-        if (ev.key === "ArrowUp") {
+        if (ev.shiftKey && ev.key === "ArrowUp") {
           ev.preventDefault();
-          console.log(count);
+          setInput(history[count]);
           if (history.length >= 0) {
-            ev.currentTarget.value = history[count];
-            setCount(count - 1);
+            if (count > 0) {
+              setCount(count - 1);
+            } else {
+              setCount(history.length);
+            }
+          }
+        }
+
+        if (ev.shiftKey && ev.key === "ArrowDown") {
+          ev.preventDefault();
+          setInput(history[count]);
+          if (history.length >= 0) {
+            if (count < history.length) {
+              setCount(count + 1);
+            } else {
+              setCount(0);
+            }
           }
         }
       }}

@@ -1,5 +1,5 @@
 import React, { createContext, useState } from "react";
-import { Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { InvItem } from "../components/Look";
 
 interface User {
@@ -27,6 +27,7 @@ export interface MyContextInterface {
   addMsg: React.Dispatch<React.SetStateAction<Context[]>>;
   token: string;
   setToken: React.Dispatch<React.SetStateAction<string>>;
+  connect: () => void;
 }
 
 export const MyContext = createContext<Partial<MyContextInterface>>({});
@@ -45,7 +46,37 @@ const Provider: React.FC<Props> = ({ children }) => {
     name: "",
   });
 
+  const connect = () => {
+    const socket = io("http://10.0.0.244:4201", {
+      transports: ["websocket"],
+    });
+    socket.on("connect", () => {
+      const localToken = sessionStorage.getItem("token") || "";
+      if (localToken) {
+        setToken!(localToken);
+        socket.send({ msg: "", data: { token: localToken } });
+      }
+    });
+
+    socket.on("message", (data: Context) => {
+      addMsg!((v) => [data, ...v]);
+      if (data.data.token) {
+        sessionStorage.setItem("token", data.data.token);
+        setToken!(data.data.token);
+      }
+
+      if (data.data.type === "self") {
+        setUser!({ ...data.data.user });
+      }
+    });
+
+    socket.io.on("close", () => console.log("Socket Closed!"));
+
+    setSocket!(socket);
+  };
+
   const initialState: MyContextInterface = {
+    connect,
     socket,
     setSocket,
     user,

@@ -1,9 +1,8 @@
 import styled from "@emotion/styled";
 import { useContext, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { io } from "socket.io-client";
 import gfm from "remark-gfm";
-import { Context, MyContext } from "../store/store";
+import { MyContext } from "../store/store";
 import InputBox from "../components/Input";
 import PoseBox from "../components/PoseBox";
 import { HelpTopics } from "../components/Help";
@@ -22,6 +21,7 @@ const Container = styled.div`
 
 interface OutputProps {
   ht: number;
+  wHt: number;
 }
 const Output = styled.div<OutputProps>`
   width: 100%;
@@ -31,7 +31,17 @@ const Output = styled.div<OutputProps>`
   flex-shrink: 1;
   top: 220px;
   width: 960px;
-  height: calc(73% - ${({ ht }) => ht}px);
+
+  height: calc(
+    ${({ wHt }) => {
+        if (wHt <= 750) return "63%";
+        if (wHt <= 850) return "65%";
+        if (wHt <= 900) return "68%";
+        if (wHt <= 1120) return "73%";
+
+        return "76%";
+      }} - ${({ ht }) => ht}px
+  );
 
   overflow-y: overlay;
   * {
@@ -71,60 +81,13 @@ const SysMsg = styled.div`
 `;
 
 const Client = () => {
-  const {
-    msgs,
-    addMsg,
-    setToken,
-    token,
-    setContents,
-    contents,
-    setUser,
-    socket,
-    setSocket,
-  } = useContext(MyContext);
+  const { msgs, addMsg, connect, socket } = useContext(MyContext);
   const [height, setHeight] = useState(68);
+  const [wHeight, setWHeight] = useState(window.innerHeight);
 
   useEffect(() => {
-    const connect = () => {
-      const socket = io("http://10.0.0.244:4201", {
-        transports: ["websocket"],
-      });
-      socket.on("connect", () => {
-        const localToken = sessionStorage.getItem("token") || "";
-        if (localToken) {
-          setToken!(localToken);
-          socket.send({ msg: "", data: { token: localToken } });
-        }
-      });
-
-      socket.on("message", (data: Context) => {
-        addMsg!((v) => [data, ...v]);
-        if (data.data.token) {
-          sessionStorage.setItem("token", data.data.token);
-          setToken!(data.data.token);
-        }
-
-        if (data.data.type === "self") {
-          setUser!({ ...data.data.user });
-        }
-      });
-
-      socket.io.on("close", () => console.log("Socket Closed!"));
-
-      setSocket!(socket);
-    };
-
-    if (!socket) connect();
-  }, [
-    addMsg,
-    setToken,
-    socket,
-    token,
-    contents,
-    setSocket,
-    setContents,
-    setUser,
-  ]);
+    if (!socket) connect!();
+  }, [connect, socket]);
 
   useEffect(() => {
     addMsg!(JSON.parse(sessionStorage.getItem("msgs") || "[]"));
@@ -134,10 +97,16 @@ const Client = () => {
     if (msgs) sessionStorage.setItem("msgs", JSON.stringify(msgs));
   }, [msgs]);
 
+  useEffect(
+    () =>
+      window.addEventListener("resize", () => setWHeight!(window.innerHeight)),
+    []
+  );
+
   return (
     <Layout index={0}>
       <Container>
-        <Output ht={height}>
+        <Output ht={height} wHt={wHeight}>
           {msgs?.map((ctx, i) => {
             switch (ctx.data.type) {
               case "look":

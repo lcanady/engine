@@ -21,7 +21,7 @@ export default () => {
 
       msgList = msgList.sort((a, b) => a.created - b.created);
 
-      for (let msg of msgList) {
+      for (let msg of msgList.splice(msgList.length - length, length)) {
         await send(ctx.id, msg.msg, msg.data);
       }
     },

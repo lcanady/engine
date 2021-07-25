@@ -47,7 +47,7 @@ const Provider: React.FC<Props> = ({ children }) => {
   });
 
   const connect = () => {
-    const socket = io("http://10.0.0.244:4201", {
+    const socket = io("http://localhost:4201", {
       transports: ["websocket"],
     });
     socket.on("connect", () => {
@@ -70,7 +70,7 @@ const Provider: React.FC<Props> = ({ children }) => {
       }
     });
 
-    socket.io.on("close", () => console.log("Socket Closed!"));
+    socket.io.on("close", (err) => console.log(err));
 
     setSocket!(socket);
   };

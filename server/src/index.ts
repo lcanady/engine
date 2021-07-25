@@ -17,6 +17,7 @@ import {
   broadcastTo,
   conns,
   remConn,
+  express,
 } from "@ursamu/core";
 import path from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -26,8 +27,18 @@ import commands from "./hooks/commands";
 import auth from "./hooks/auth";
 import { readFile } from "fs/promises";
 import { Dirent, PathLike } from "fs";
+import helmet from "helmet";
 
 dotenv.config();
+
+app.use(
+  helmet.contentSecurityPolicy({
+    useDefaults: true,
+    directives: {
+      imgSrc: ["self", "data:", "*"],
+    },
+  })
+);
 
 const intro = `
 ██╗   ██╗██████╗ ███████╗ █████╗ ███╗   ███╗██╗   ██╗
@@ -77,6 +88,17 @@ hooks.use(auth, commands);
       ]);
     }
   );
+
+  await loaddir(
+    path.join(__dirname, "../help/"),
+    async (file: Dirent, path: PathLike) => {
+      const text = await readFile(`${path}/${file.name}`, { encoding: "utf8" });
+      textDB.set("help", [
+        { name: file.name.split(".")[0], category: "help", body: text },
+      ]);
+    }
+  );
+
   await loaddir(path.join(__dirname, "./plugins/"));
 })();
 
@@ -151,5 +173,12 @@ setInterval(async () => {
     }
   }
 }, 60000);
+
+app.use(express.static(path.resolve(__dirname, "../../client/build/")));
+
+// Handles any requests that don't match the ones above
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../../client/build/index.html"));
+});
 
 server.listen(4201, () => console.log(intro));

@@ -5,7 +5,7 @@ import gfm from "remark-gfm";
 import { MyContext } from "../store/store";
 import InputBox from "../components/Input";
 import PoseBox from "../components/PoseBox";
-import { HelpTopics } from "../components/Help";
+import { HelpTopic, HelpTopics } from "../components/Help";
 import Look from "../components/Look";
 import { Layout } from "../components/Layout";
 
@@ -117,6 +117,8 @@ const Client = () => {
                 return <PoseBox ctx={ctx} key={i} />;
               case "helpTopics":
                 return <HelpTopics topics={ctx.data.topics} key={i} />;
+              case "helpTopic":
+                return <HelpTopic topic={ctx.data.help} key={i} />;
               default:
                 return (
                   <SysMsg key={i}>

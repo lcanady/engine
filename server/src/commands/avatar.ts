@@ -3,17 +3,6 @@ import { db } from "..";
 import { target } from "../utils/utils";
 
 export default () => {
-  addText("help", {
-    name: "@avatar",
-    category: "help",
-    body: `
-# @avatar
-SYNTAX: @avatar <tafget>=<url>
-
-Add an avatar image from a valid URL to an in-game object.
-  `.trim(),
-  });
-
   addCmd({
     name: "@avatar",
     pattern: /^[@\+]?av[atar]*\s+(\w+)\s*=\s*(.*)/i,

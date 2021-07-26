@@ -4,7 +4,7 @@ import { msgs } from "..";
 export default () => {
   addCmd({
     name: "history",
-    pattern: /^[\+@]?history(?:\/(\w+))?(?:\s+(\d+))?/i,
+    pattern: /^(?:[\+@]?his[tory]*|[\+@]?last)(?:\/(\w+))?(?:\s+(\d+))?/i,
     flags: "connected",
     render: async (args, ctx) => {
       let msgList = (await msgs.find({ id: ctx.player?.location })) || [];

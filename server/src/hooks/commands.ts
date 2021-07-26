@@ -4,18 +4,16 @@ import { db } from "..";
 export default async (ctx: Context) => {
   if (!ctx.data?.found) {
     try {
-      console.log("in try");
       for (const cmd of cmds) {
         const match = ctx.msg?.match(cmd.pattern);
         if (match) {
-          console.log(match);
           if (ctx.player) {
             ctx.player.temp.lastCommand = Date.now();
-            await db.update({ _id: ctx.player._id }, ctx.player);
+            db.update({ _id: ctx.player._id }, ctx.player);
           }
           if (!cmd.flags || flags.check(ctx.player?.flags || "", cmd.flags)) {
-            await cmd.render(match, ctx);
             ctx.data.found = true;
+            return await cmd.render(match, ctx);
           }
         }
       }

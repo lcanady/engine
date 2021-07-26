@@ -19,6 +19,13 @@ export const TableBody = styled.div`
   }
 `;
 
+export const TableTitle = styled.h2`
+  margin-top: 16px;
+  font-family: "Roboto Mono";
+  font-size: 0.9rem;
+  color: white;
+`;
+
 interface HeaderProps {
   width: string;
   align?: string;

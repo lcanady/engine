@@ -8,6 +8,7 @@ import PoseBox from "../components/PoseBox";
 import { HelpTopic, HelpTopics } from "../components/Help";
 import Look from "../components/Look";
 import { Layout } from "../components/Layout";
+import { Who } from "../components/Who";
 
 const Container = styled.div`
   display: block;
@@ -34,10 +35,12 @@ const Output = styled.div<OutputProps>`
 
   height: calc(
     ${({ wHt }) => {
-        if (wHt <= 750) return "63%";
+        if (wHt <= 700) return "60%";
+        if (wHt <= 770) return "63%";
         if (wHt <= 850) return "65%";
         if (wHt <= 900) return "68%";
-        if (wHt <= 1120) return "73%";
+        if (wHt <= 970) return "70%";
+        if (wHt <= 1120) return "70%";
 
         return "76%";
       }} - ${({ ht }) => ht}px
@@ -77,7 +80,7 @@ const Output = styled.div<OutputProps>`
 const SysMsg = styled.div`
   font-family: "Roboto Mono";
   font-size: 0.85rem;
-  margin-left: 8px;
+  margin: 4px 8px 4px 8px;
 `;
 
 const Client = () => {
@@ -108,17 +111,19 @@ const Client = () => {
       <Container>
         <Output ht={height} wHt={wHeight}>
           {msgs?.map((ctx, i) => {
-            switch (ctx.data.type) {
+            switch (ctx.data.type?.toLowerCase()) {
               case "look":
                 return <Look ctx={ctx} key={i} />;
               case "say":
                 return <PoseBox ctx={ctx} key={i} />;
               case "pose":
                 return <PoseBox ctx={ctx} key={i} />;
-              case "helpTopics":
+              case "helptopics":
                 return <HelpTopics topics={ctx.data.topics} key={i} />;
-              case "helpTopic":
+              case "helptopic":
                 return <HelpTopic topic={ctx.data.help} key={i} />;
+              case "who":
+                return <Who list={ctx.data.list} key={i} />;
               default:
                 return (
                   <SysMsg key={i}>

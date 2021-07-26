@@ -57,7 +57,11 @@ export const target = async (enactor: DBObj, tar: string) => {
       return (
         await db.find({
           $where: function () {
-            if (this.name.toLowerCase() === tar.trim() || this._id === tar) {
+            if (
+              this.name.toLowerCase() === tar ||
+              this._id === tar ||
+              this.alias?.toLowerCase() === tar
+            ) {
               return true;
             }
             return false;
@@ -141,4 +145,10 @@ export const idle = (secs: number) => {
   if (hrs) return hrs + "h";
   if (mins) return mins + "m";
   return secs + "s";
+};
+
+export const andList = (list: string[]) => {
+  const last = list.pop() || "";
+  const commas = list.join(",");
+  return `${commas}${commas ? "and" : ""}${last}`;
 };

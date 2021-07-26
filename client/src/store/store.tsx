@@ -15,10 +15,10 @@ export interface Context {
 }
 
 export interface MyContextInterface {
-  user: User;
+  user: User | undefined;
   setSocket: React.Dispatch<React.SetStateAction<Socket | undefined>>;
   socket: Socket | undefined;
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
   flags: string;
   setFlags: React.Dispatch<React.SetStateAction<string>>;
   contents: InvItem[];
@@ -39,12 +39,7 @@ const Provider: React.FC<Props> = ({ children }) => {
   const [flags, setFlags] = useState<string>("");
   const [contents, setContents] = useState<InvItem[]>([]);
   const [socket, setSocket] = useState<Socket | undefined>();
-  const [user, setUser] = useState<User>({
-    id: "",
-    flags: "",
-    avatar: "",
-    name: "",
-  });
+  const [user, setUser] = useState<User | undefined>();
 
   const connect = () => {
     const socket = io("http://localhost:4201", {

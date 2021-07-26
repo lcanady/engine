@@ -7,7 +7,6 @@ const Wrapper = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
 `;
 
 const Login = styled.p``;
@@ -16,9 +15,8 @@ const UserContainer = styled.div`
   display: flex;
   align-items: center;
   margin-top: -12px;
+  margin-left: 100px;
 `;
-
-const Title = styled.p``;
 
 export const User: React.FC = () => {
   const { user } = useContext(MyContext);
@@ -28,7 +26,6 @@ export const User: React.FC = () => {
       {user ? (
         <UserContainer>
           <Avatar img={user.avatar} width="32px" height="32px" />
-          <Title>/{user.name}</Title>
         </UserContainer>
       ) : (
         <Login>login</Login>

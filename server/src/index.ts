@@ -19,7 +19,7 @@ import {
   remConn,
   express,
 } from "@ursamu/core";
-import path from "path";
+import path, { join, resolve } from "path";
 import wikiRoutes from "./routes/wikiRoutes";
 import charRoutes from "./routes/charRoutes";
 import dotenv from "dotenv";
@@ -173,7 +173,7 @@ setInterval(async () => {
     }
   }
 }, 60000);
-
+app.use("/uploads", express.static(join(__dirname, "uploads")));
 app.use(express.static(path.resolve(__dirname, "../../client/build/")));
 
 // Handles any requests that don't match the ones above

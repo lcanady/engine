@@ -34,7 +34,7 @@ const PoseBox: React.FC<Props> = ({
   const { user } = useContext(MyContext);
   return (
     <Wrapper>
-      <Avatar img={avatar} />
+      <Avatar img={`http://localhost:4201/uploads/${avatar}`} />
       <TextBlock>
         <Name>
           {name}

@@ -64,9 +64,13 @@ const Look: React.FC<Props> = ({ ctx }) => {
   return (
     <Container player={!!flags.includes("player")}>
       {avatar && flags.includes("player") ? (
-        <Avatar img={avatar} height="60px" width="60px" />
+        <Avatar
+          img={`http://localhost:4201/uploads/${avatar}`}
+          height="60px"
+          width="60px"
+        />
       ) : (
-        <Image url={avatar} />
+        <Image url={`http://localhost:4201/uploads/${avatar}`} />
       )}
       <TextContainer>
         <h2>

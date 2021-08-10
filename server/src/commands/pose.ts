@@ -4,7 +4,7 @@ import { msgs } from "..";
 export default () => {
   addCmd({
     name: "pose",
-    pattern: /^(pose\s+|:|;)([\s\S]+)/i,
+    pattern: /^(pose\s+|:|;)(.*)/i,
     flags: "connected",
     render: async (args, ctx) => {
       let msg = "";

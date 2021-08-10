@@ -1,4 +1,4 @@
-import { addCmd, force, hash, send } from "@ursamu/core";
+import { addCmd, flags, force, hash, send } from "@ursamu/core";
 import { config, db } from "..";
 import { createEntity, login } from "../utils/utils";
 
@@ -39,8 +39,7 @@ export default () => {
         await db.update({ id: player._id }, player);
 
         // Log the new player in and fire off some beginning commands!
-        const token = await login(ctx.socket, args[1], args[2]);
-        await send(ctx.id, "Welcome to the game!", { token });
+        await login(ctx.socket, { name: args[1], password: args[2] });
         await force(ctx, "motd");
         await force(ctx, "look");
       } else {

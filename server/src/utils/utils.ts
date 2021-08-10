@@ -8,43 +8,59 @@ import {
   MUSocket,
   send,
   sign,
+  verify,
 } from "@ursamu/core";
 import { db } from "..";
 
+interface LoginOptions {
+  name?: string;
+  password?: string;
+  token?: string;
+}
+
 export const login = async (
   socket: MUSocket,
-  name: string,
-  password: string
+  { name, password, token }: LoginOptions
 ) => {
-  const regex = new RegExp(name, "i");
+  const id = token
+    ? (await verify(token || "", process.env.SECRET || "")) || ""
+    : "";
+  const regex = new RegExp(id ? id : name, "i");
   const player = (await db.find({ name: regex }))[0];
+
   if (player) {
-    if (compare(password, player.password || "")) {
+    if ((await compare(password || "", player.password || "")) || id) {
       socket.cid = player._id;
       conns.push(socket);
       const { tags } = flags.set(player.flags, {}, "connected");
       player.temp = {};
+      player.flags = tags;
       await db.update({ _id: player._id }, player);
-      broadcastTo(player.location, `${player.name} has conencted.`, {
-        type: "connect",
-        id: player._id,
-        name: player.name,
-        flags: player.flags,
-      });
+
+      if (!player.temp.lastCommand) {
+        broadcastTo(player.location, `${player.name} has conencted.`, {
+          type: "connect",
+          id: player._id,
+          name: player.name,
+          flags: player.flags,
+        });
+      }
+
+      socket.join(id);
       socket.join(player._id!);
       socket.join(player.location);
+
       player.data.channels?.forEach((channel: string) => socket.join(channel));
+
       await send(socket.id, "", {
         type: "self",
         id: player._id,
         flags: player.flags,
+        token: await sign(player._id!, process.env.SECRET || ""),
       });
     }
   }
-  return {
-    token: await sign(player._id!, process.env.SECRET || ""),
-    player,
-  };
+  return player;
 };
 
 export const target = async (enactor: DBObj, tar: string) => {

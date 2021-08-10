@@ -5,7 +5,7 @@ export default () => {
   addCmd({
     name: "say",
     flags: "connected",
-    pattern: /^(?:s[ay]*?\s+?|")([\s\S]+)/i,
+    pattern: /^(?:s[ay]*?\s+?|")(.*)/i,
     render: async (args, ctx) => {
       await send(
         ctx.player?.location || "",

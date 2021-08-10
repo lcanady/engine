@@ -16,13 +16,13 @@ const server = telnetlib.createServer(
   (c) => {
     const s = new io("http://localhost:4201", { transports: ["websocket"] });
     const naws = c.getOption(NAWS);
+    let token;
     c.on("negotiated", () => {
       naws.on("resize", (data) => {
         c.width = data.width;
         c.height = data.height;
       });
     });
-    let token;
     c.id = nanoid();
 
     s.on("login", async () => {
@@ -33,8 +33,8 @@ const server = telnetlib.createServer(
     });
 
     s.on("message", (ctx) => {
-      const { token, connected } = ctx.data;
-
+      const { token: tkn, connected } = ctx.data;
+      if (tkn) token = tkn;
       if (connected && token) {
         c.write("...Reconnecting\r\n");
       } else if (ctx.msg) {
@@ -42,12 +42,12 @@ const server = telnetlib.createServer(
       }
     });
 
-    c.on("data", (data) =>
+    c.on("data", (data) => {
       s.send({
         data: { token, height: c.height, width: c.width },
         msg: data.toString(),
-      })
-    );
+      });
+    });
   }
 );
 

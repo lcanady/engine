@@ -1,8 +1,31 @@
-import { addCmd, DBObj, flags, send } from "@ursamu/core";
+import { addCmd, DBObj, send } from "@ursamu/core";
 import { db } from "..";
-import { canEdit, idle, name, target } from "../utils/utils";
+import { idle, name, target } from "../utils/utils";
+
+interface TextDescParts {
+  tarName: string;
+  desc: string;
+  items: Item[];
+  flags: string;
+}
+
+interface Item {
+  name: string;
+  id: string;
+  desc: string;
+  shortdesc: string;
+  avatar: string;
+  flags: string;
+  idle: string;
+}
 
 export default () => {
+  const textDesc = ({ tarName, desc, items, flags }: TextDescParts) => {
+    return `${tarName}\n${desc}\n\n${
+      flags.includes("room") ? "contents" : "Carrying"
+    }\n`;
+  };
+
   addCmd({
     name: "look",
     pattern: /^l[ook]*?(?:\s+?(.*))?/i,
@@ -14,7 +37,7 @@ export default () => {
       const tar = await target(ctx.player!, args[1] || "here");
       let contents: DBObj[] = [];
       if (tar) {
-        tarName = name(ctx.player!, tar, true) + "\n\n";
+        tarName = name(ctx.player!, tar, true);
         contents = await db.find({ location: tar._id });
         contents = contents.filter((item) =>
           (item.flags.includes("player") && item.flags.includes("connected")) ||
@@ -22,11 +45,11 @@ export default () => {
             ? true
             : false
         );
-        let items = [];
+        let items: Item[] = [];
         for (let item of contents) {
           items.push({
             name: name(ctx.player!, item),
-            id: item._id,
+            id: item._id!,
             desc: item.description,
             shortdesc: item.data.shortdesc,
             avatar: item.data.avatar,
@@ -34,6 +57,16 @@ export default () => {
             idle: idle(item.temp.lastCommand || Date.now()),
           });
         }
+
+        await send(
+          ctx.id,
+          textDesc({
+            tarName,
+            desc: tar.description,
+            items,
+            flags: tar.flags,
+          })
+        );
 
         await send(ctx.id, "", {
           type: "look",

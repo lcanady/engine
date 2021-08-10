@@ -16,7 +16,6 @@ import commands from "./hooks/commands";
 import auth from "./hooks/auth";
 import defaults from "./hooks/default";
 import "./lib/loadResources";
-import "./lib/ioHandler";
 import "./lib/timers";
 
 dotenv.config();

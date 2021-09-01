@@ -39,7 +39,7 @@ export default () => {
         await db.update({ id: player._id }, player);
 
         // Log the new player in and fire off some beginning commands!
-        await login(ctx.socket, { name: args[1], password: args[2] });
+        await login(ctx, { name: args[1], password: args[2] });
         await force(ctx, "motd");
         await force(ctx, "look");
       } else {

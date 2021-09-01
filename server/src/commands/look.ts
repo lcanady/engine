@@ -22,8 +22,11 @@ interface Item {
 export default () => {
   const textDesc = ({ tarName, desc, items, flags }: TextDescParts) => {
     return `${tarName}\n${desc}\n\n${
-      flags.includes("room") ? "contents" : "Carrying"
-    }\n`;
+      flags.includes("room") ? "contents:" : "Carrying:"
+    }\n${items
+      .filter((item) => item.flags.includes("connected"))
+      .map((item) => item.name)
+      .join("\n")}`;
   };
 
   addCmd({
@@ -31,7 +34,6 @@ export default () => {
     pattern: /^l[ook]*?(?:\s+?(.*))?/i,
     flags: "connected",
     render: async (args, ctx) => {
-      let desc = "";
       let tarName = "";
 
       const tar = await target(ctx.player!, args[1] || "here");

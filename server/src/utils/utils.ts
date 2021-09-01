@@ -2,6 +2,7 @@ import {
   broadcastTo,
   compare,
   conns,
+  Context,
   Data,
   DBObj,
   flags,
@@ -19,47 +20,30 @@ interface LoginOptions {
 }
 
 export const login = async (
-  socket: MUSocket,
+  ctx: Context,
   { name, password, token }: LoginOptions
 ) => {
   const id = token
-    ? (await verify(token || "", process.env.SECRET || "")) || ""
+    ? (await verify(token || "", process.env.SECRET || "")).id || ""
     : "";
-  const regex = new RegExp(id ? id : name, "i");
-  const player = (await db.find({ name: regex }))[0];
 
-  if (player) {
+  const regex = new RegExp(id ? id : name, "i");
+  const player = (await db.find({ $or: [{ name: regex }, { _id: regex }] }))[0];
+
+  if (player && !id) {
     if ((await compare(password || "", player.password || "")) || id) {
-      socket.cid = player._id;
-      conns.push(socket);
       const { tags } = flags.set(player.flags, {}, "connected");
       player.temp = {};
       player.flags = tags;
-      await db.update({ _id: player._id }, player);
-
-      if (!player.temp.lastCommand) {
-        broadcastTo(player.location, `${player.name} has conencted.`, {
-          type: "connect",
-          id: player._id,
-          name: player.name,
-          flags: player.flags,
-        });
-      }
-
-      socket.join(id);
-      socket.join(player._id!);
-      socket.join(player.location);
-
-      player.data.channels?.forEach((channel: string) => socket.join(channel));
-
-      await send(socket.id, "", {
-        type: "self",
-        id: player._id,
-        flags: player.flags,
-        token: await sign(player._id!, process.env.SECRET || ""),
-      });
     }
+  } else if (id) {
+    const { tags } = flags.set(player.flags, {}, "connected");
+    player.temp = {};
+    player.flags = tags;
+  } else {
+    await send(ctx.id, "Permission denied");
   }
+  await db.update({ _id: id }, player);
   return player;
 };
 

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "concurrently \"cd client && yarn build\"  \"cd server && yarn build\"",
-    "dev": "concurrently \"cd server && yarn dev\" \"cd client && yarn start\" \" cd server/telnet && yarn start\"",
+    "dev": "concurrently \"cd server && yarn dev\" \"cd client && yarn start\" \" cd server/telnet && node index\"",
     "start": "yarn build && cd server && pm2 start dist/index.js --watch"
   },
   "keywords": [],

@@ -13,17 +13,20 @@ const server = telnetlib.createServer(
     localOptions: [NAWS],
     remoteOptions: [NAWS],
   },
-  (c) => {
+  async (c) => {
     const s = new io("http://localhost:4201", { transports: ["websocket"] });
     const naws = c.getOption(NAWS);
     let token;
-    c.on("negotiated", () => {
-      naws.on("resize", (data) => {
-        c.width = data.width;
-        c.height = data.height;
-      });
+    naws.on("resize", (data) => {
+      c.width = data.width;
+      c.height = data.height;
     });
     c.id = nanoid();
+
+    const connect = await readFile(join(__dirname, "../text/connect.txt"), {
+      encoding: "utf8",
+    });
+    c.write(connect + "\r\n");
 
     s.on("login", async () => {
       const connect = await readFile(join(__dirname, "../text/connect.txt"), {

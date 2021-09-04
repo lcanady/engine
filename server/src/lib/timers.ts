@@ -8,13 +8,18 @@ setInterval(async () => {
     },
   });
 
+  console.log(conns.length);
+
   if (players) {
     for (const player of players) {
       const diff = Math.round(
         (Date.now() - player.temp.lastCommand || Date.now()) / (1000 * 3600)
       );
 
-      const conn = conns.find((conn) => conn.cid === player._id);
+      const conn = conns.find((conn) => {
+        if (conn.cid === player._id) console.log(conn.cid);
+        return conn.cid === player._id;
+      });
 
       if (
         diff &&

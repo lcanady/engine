@@ -261,7 +261,7 @@
   dependencies:
     "@digibear/middleware" "^0.2.3"
     "@digibear/tags" "^0.2.11"
-    "@ursamu/parser" "^1.2.0"
+    "@ursamu/parser" "^1.2.3"
     bcrypt "^5.0.1"
     cors "^2.8.5"
     express "^4.17.1"
@@ -277,10 +277,10 @@
     socket.io-client "^4.0.2"
     telnetlib "^0.1.0"
 
-"@ursamu/parser@^1.2.0":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@ursamu/parser/-/parser-1.2.1.tgz#6b12b7c7f7732ed6fff13a51eb8b9ad35ed986c7"
-  integrity sha512-Ov5S0sYOnrPkS8jmx+ig37bCrqC4yNcmx2KEGrMDM2rM86KmfQnQm60XVK+cq3zJ+DWeF1g+iTFIszyYy7nrQg==
+"@ursamu/parser@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@ursamu/parser/-/parser-1.2.3.tgz#27693fec0df87197bff3e5ce1fcaa27dcc45c0a1"
+  integrity sha512-a7WPKq7yA2KM8L8R3czp94osTOj4UqbrAspUGwABAiS4D1cgXtoLTQhHj40OkX5GO/TyHf1JpdShgSH5glhfwQ==
   dependencies:
     pegjs "^0.10.0"
 

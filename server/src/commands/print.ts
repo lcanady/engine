@@ -1,4 +1,4 @@
-import { addCmd, send } from "@ursamu/core";
+import { addCmd, parser, send } from "@ursamu/core";
 
 export default () => {
   addCmd({
@@ -6,7 +6,10 @@ export default () => {
     pattern: /^(?:print|th[ink]*)\s+(.*)/i,
     flags: "connected",
     render: async (args, ctx) => {
-      send(ctx.id, args[1]);
+      await send(
+        ctx.id,
+        (await parser.run({ data: ctx.data, msg: args[1], scope: {} })) || ""
+      );
     },
   });
 };

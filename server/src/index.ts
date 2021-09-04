@@ -11,6 +11,8 @@ import {
   io,
   MUSocket,
   Context,
+  send,
+  textDB,
 } from "@ursamu/core";
 import path, { join } from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -21,6 +23,7 @@ import auth from "./hooks/auth";
 import defaults from "./hooks/default";
 import "./lib/loadResources";
 import "./lib/timers";
+import { readFile } from "fs/promises";
 
 dotenv.config();
 
@@ -80,7 +83,7 @@ app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "../../client/build/index.html"));
 });
 
-io.on("connect", (socket: MUSocket) => {
+io.on("connect", async (socket: MUSocket) => {
   // send a connect message!
   socket.join(socket.id);
 

@@ -1,14 +1,12 @@
 import {
-  broadcastTo,
   compare,
-  conns,
   Context,
   Data,
   DBObj,
   flags,
   MUSocket,
+  parser,
   send,
-  sign,
   verify,
 } from "@ursamu/core";
 import { db } from "..";
@@ -107,8 +105,8 @@ export const canEdit = (en: DBObj, tar: DBObj) => {
 };
 
 export const name = (en: DBObj, tar: DBObj, bold = false) => {
-  let name = bold ? `**${tar.name}**` : tar.name;
-  if (canEdit(en, tar)) name += `(${tar._id}-${flags.codes(tar.flags)})`;
+  let name = bold ? `%ch${tar.name}%cn` : tar.name;
+  if (canEdit(en, tar)) name += `(${flags.codes(tar.flags)})`;
   return name;
 };
 
@@ -151,4 +149,97 @@ export const andList = (list: string[]) => {
   const last = list.pop() || "";
   const commas = list.join(",");
   return `${commas}${commas ? "and" : ""}${last}`;
+};
+
+export const remainder = (str: string, width: number, type = "telnet") => {
+  const subsStr = parser.stripSubs(type, str).length;
+
+  const rem = Math.round(width % width);
+
+  let pad = "";
+
+  if (/%c/g.test(str) && subsStr >= 2)
+    pad =
+      str
+        .repeat(20)
+        .split("%c")
+        .filter(Boolean)
+        .slice(0, rem)
+        .map((char: string) => `%c${char}`)
+        .join("") + "%cn";
+
+  if (/%c/g.test(str) && subsStr <= 1) pad = str.repeat(rem) + "%cn";
+  if (!/%c/g.test(str)) pad = str.slice(0, rem);
+
+  // return repeat.repeat(width / reWidth);
+  return pad;
+};
+
+/**
+ * Repeat a string.
+ * @param str The string to be releated
+ * @param width Width with of the string to repeat
+ * @param type The type of subs to perform defaults to 'telnet'.
+ * @returns
+ */
+export const repeat = (str: string, width: number, type = "telnet") => {
+  const reWidth: number = parser.stripSubs(type ? type : "telnet", str).length;
+
+  const rem = Math.round(width % reWidth);
+
+  let pad = "";
+
+  if (/%c/g.test(str) && reWidth >= 2)
+    pad =
+      str
+        .repeat(20)
+        .split("%c")
+        .filter(Boolean)
+        .slice(0, rem)
+        .map((char: string) => `%c${char}`)
+        .join("") + "%cn";
+
+  if (/%c/g.test(str) && reWidth <= 1) pad = str.repeat(rem) + "%cn";
+  if (!/%c/g.test(str)) pad = str.slice(0, rem);
+
+  return str.repeat(width / reWidth) + pad;
+};
+
+export const center = (str = "", width = 78, filler = " ", type = "telnet") => {
+  const subWords = parser.stripSubs(type, str).length;
+  const subFiller = parser.stripSubs("telnet", filler).length;
+  const repWidth = width - subWords;
+
+  return (
+    repeat(filler, Math.round(repWidth / subFiller)) +
+    str +
+    repeat(filler, Math.floor(repWidth / subFiller))
+  );
+};
+
+export const columns = (
+  list: string[],
+  width: number = 78,
+  columns: number = 4
+) => {
+  let line = "";
+  let table = "";
+  for (const item of list) {
+    const cell =
+      item +
+      repeat(
+        " ",
+        Math.round(width / columns - parser.stripSubs("telnet", item).length) -
+          3
+      );
+
+    if (parser.stripSubs("telnet", line + cell).length < width) {
+      line += cell;
+    } else {
+      table += line + "%r";
+      line = cell;
+    }
+  }
+
+  return table;
 };

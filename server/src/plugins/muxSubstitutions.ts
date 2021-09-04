@@ -15,50 +15,58 @@ function hexToRgb(hex: string) {
 }
 
 export default () => {
+  // Markdown substitutions
+  parser.addSubs("telnet", {
+    before: "\\*\\*([^\\*]+)\\*\\*",
+    after: "%ch$1%cn",
+    strip: "$1",
+  });
+
+  // Ansi substitutions
   parser.addSubs(
     "telnet",
     {
-      before: "%cx",
+      before: /%cx/g,
       after: "\u001b[30m",
     },
     {
-      before: "%cr",
+      before: /%cr/g,
       after: "\u001b[31m",
     },
     {
-      before: "%cg",
+      before: /%cg/g,
       after: "\u001b[32m",
     },
     {
-      before: "%cy",
+      before: /%cy/g,
       after: "\u001b[33m",
     },
     {
-      before: "%cb",
+      before: /%cb/g,
       after: "\u001b[34m",
     },
     {
-      before: "%cm",
+      before: /%cm/g,
       after: "\u001b[35m",
     },
     {
-      before: "%cc",
+      before: /%cc/g,
       after: "\u001b[36m",
     },
     {
-      before: "%cw",
+      before: /%cw/g,
       after: "\u001b[37m",
     },
     {
-      before: "%cn",
+      before: /%cn/g,
       after: "\u001b[0m",
     },
     {
-      before: "%ch",
+      before: /%ch/g,
       after: "\u001b[1m",
     },
     {
-      before: "%u",
+      before: /%u/g,
       after: "\u001b[4m",
     },
 

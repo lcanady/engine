@@ -12,7 +12,11 @@ export default async (ctx: Context, next: Next) => {
           db.update({ _id: ctx.player._id }, ctx.player);
         }
 
-        if (!cmd.flags || flags.check(ctx.player?.flags || "", cmd.flags)) {
+        if (
+          !cmd.flags ||
+          flags.check(ctx.player?.flags || "", cmd.flags) ||
+          cmd.name === "quit"
+        ) {
           return await cmd.render(match, ctx);
         } else {
           return next();

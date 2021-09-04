@@ -24,7 +24,9 @@ export default () => {
         (err) => console.log(err)
       );
 
-      conns.push(ctx.socket);
+      const conn = conns.find((conn) => conn.id === ctx.id);
+      if (!conn) conns.push(ctx.socket);
+
       await send(ctx.socket.id, "", {
         type: "self",
         id: player?._id,

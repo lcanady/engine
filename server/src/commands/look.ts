@@ -1,12 +1,13 @@
-import { addCmd, DBObj, send } from "@ursamu/core";
+import { addCmd, DBObj, parser, send } from "@ursamu/core";
 import { db } from "..";
-import { idle, name, target } from "../utils/utils";
+import { center, idle, name, repeat, target } from "../utils/utils";
 
 interface TextDescParts {
   tarName: string;
   desc: string;
   items: Item[];
   flags: string;
+  width?: number;
 }
 
 interface Item {
@@ -20,13 +21,61 @@ interface Item {
 }
 
 export default () => {
-  const textDesc = ({ tarName, desc, items, flags }: TextDescParts) => {
-    return `${tarName}\n${desc}\n\n${
-      flags.includes("room") ? "contents:" : "Carrying:"
-    }\n${items
-      .filter((item) => item.flags.includes("connected"))
-      .map((item) => item.name)
-      .join("\n")}`;
+  const charStatus = (char: Item, width: number) => {
+    const match = char.idle.match(/(\d{1,3})(\w)/);
+    let colorIdle = char.idle;
+    let tag = "%b%b";
+    if (match) {
+      let [_, time, mark] = match;
+      let currTime = parseInt(time, 10);
+      if (mark === "s") colorIdle = `%ch%cg${colorIdle}%cn`;
+      if (mark === "m" && currTime < 15) colorIdle = `%cg${colorIdle}%cn`;
+      if (mark === "m" && currTime > 14 && currTime < 30)
+        colorIdle = `%ch%cy${colorIdle}%cn`;
+      if (mark === "m" && currTime > 30) colorIdle = `%ch%cr${colorIdle}%cn`;
+      if (mark === "h") colorIdle = `%ch%cx${colorIdle}%cn`;
+    }
+
+    if (char.flags.includes("immortal")) tag = "%ch%cy*%cn%b";
+
+    return `${tag}${
+      char.name + " ".repeat(30 - parser.stripSubs("telnet", char.name).length)
+    }%b${
+      " ".repeat(5 - parser.stripSubs("telnet", colorIdle).length) +
+      colorIdle +
+      "%b"
+    }${
+      char.shortdesc
+        ? char.shortdesc.substring(0, width - 40)
+        : "%ch%cxType '+shortdesc <desc>' to set.%cn"
+    }`;
+  };
+
+  const textDesc = ({
+    tarName,
+    desc,
+    items,
+    flags,
+    width = 78,
+  }: TextDescParts) => {
+    return (
+      center(
+        `%cy<%ch<%cn%ch ${tarName} %ch%cy>%cn%cy>%cn`,
+        width,
+        "%cb=%ch-%cn"
+      ) +
+      "%r%r" +
+      desc +
+      "%r%r" +
+      center(`%cy<%ch<%cn%ch Characters %cy>%cn%cy>%cn`, width, "%cb-%cb-%cn") +
+      "%r" +
+      items
+        .filter((item) => item.flags.includes("connected"))
+        .map((char) => charStatus(char, width))
+        .join("%r") +
+      "%r" +
+      repeat("%cb=%ch-%cn", width)
+    );
   };
 
   addCmd({
@@ -67,17 +116,17 @@ export default () => {
             desc: tar.description,
             items,
             flags: tar.flags,
-          })
+            width: ctx.data.width,
+          }),
+          {
+            type: "look",
+            desc: tar.description,
+            name: name(ctx.player!, tar),
+            avatar: tar.data.avatar,
+            items,
+            flags: tar.flags,
+          }
         );
-
-        await send(ctx.id, "", {
-          type: "look",
-          desc: tar.description,
-          name: name(ctx.player!, tar),
-          avatar: tar.data.avatar,
-          items,
-          flags: tar.flags,
-        });
       } else {
         await send(ctx.id, "I don't see that here.");
       }

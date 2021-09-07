@@ -85,7 +85,7 @@ export const createEntity = async (
   const id = async () => {
     const dbrefs = (await db.find({})).map((item) => item.dbref) as number[];
 
-    var mia = dbrefs.reduce(function (acc: number[], cur, ind, arr) {
+    var mia = dbrefs.sort().reduce(function (acc: number[], cur, ind, arr) {
       var diff = cur - arr[ind - 1];
       if (diff > 1) {
         var i = 1;
@@ -136,7 +136,7 @@ export const name = (en: DBObj, tar: DBObj, bold = false) => {
   if (canEdit(en, tar) && !parts[1])
     name += `(#${tar.dbref}${flags.codes(tar.flags)})`;
   if (parts[1])
-    name = `%ch${tar.flags.includes("dark") ? "* " : "  "}${parts[0]}(#${
+    name = `%ch${tar.flags.includes("dark") ? "*" : ""}${parts[0]}(#${
       tar.dbref
     }${flags.codes(tar.flags)}) <%cy${parts[1].toUpperCase()}%cn%ch>%cn`;
   return name;

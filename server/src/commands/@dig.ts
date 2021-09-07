@@ -1,6 +1,6 @@
 import { addCmd, DBObj, send } from "@ursamu/core";
 import { db } from "..";
-import { createEntity } from "../utils/utils";
+import { createEntity, name } from "../utils/utils";
 
 export default () => {
   addCmd({
@@ -15,7 +15,7 @@ export default () => {
       toRoom = await createEntity(args[2], "room", { owner: ctx.player?._id });
       send(
         ctx.id,
-        `Done. New room created: %ch${toRoom.name.split(";")[0]}%cn`
+        `Done. New room created: %ch${name(ctx.player!, toRoom)}%cn`
       );
 
       if (args[3]) {
@@ -28,9 +28,10 @@ export default () => {
         });
         send(
           ctx.id,
-          `Done. New exit: %ch${toExit.name.split(";")[0]}%cn linked to: %ch${
-            toRoom.name.split(";")[0]
-          }%cn`
+          `Done. New exit: %ch${name(
+            ctx.player!,
+            toExit
+          )}%cn linked to: %ch${name(ctx.player!, toRoom)}%cn`
         );
       }
 
@@ -44,9 +45,10 @@ export default () => {
         });
         send(
           ctx.id,
-          `Done. New exit: %ch${fromExit.name.split(";")[0]}%cn linked to: %ch${
-            fromRoom?.name.split(";")[0]
-          }%cn`
+          `Done. New exit: %ch${name(
+            ctx.player!,
+            fromExit
+          )}%cn linked to: %ch${name(ctx.player!, fromRoom!)}%cn`
         );
       }
     },

@@ -98,7 +98,7 @@ export default () => {
       rtrn +=
         center(`%cy<%ch<%cn%ch Exits %cy>%cn%cy>%cn`, width, "%cb-%cb-%cn") +
         "%r" +
-        columns(exitNames, width, 3) +
+        columns(exitNames, width, 2) +
         "%r";
     }
 

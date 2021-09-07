@@ -7,12 +7,9 @@ import {
   DBObj,
   Article,
   express,
-  emitter,
   io,
   MUSocket,
   Context,
-  send,
-  textDB,
 } from "@ursamu/core";
 import path, { join } from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -21,9 +18,9 @@ import dotenv from "dotenv";
 import commands from "./hooks/commands";
 import auth from "./hooks/auth";
 import defaults from "./hooks/default";
+import move from "./hooks/move";
 import "./lib/loadResources";
 import "./lib/timers";
-import { readFile } from "fs/promises";
 
 dotenv.config();
 
@@ -73,7 +70,7 @@ export type Msg = {
 export const msgs = new DB<Msg>(path.resolve(__dirname, "../../data/msgs.db"));
 
 // load hooks.
-hooks.use(auth, commands, defaults);
+hooks.use(auth, commands, move, defaults);
 
 app.use("/uploads", express.static(join(__dirname, "uploads")));
 app.use(express.static(path.resolve(__dirname, "../../client/build/")));

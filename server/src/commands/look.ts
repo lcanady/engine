@@ -1,13 +1,14 @@
-import { addCmd, DBObj, parser, send } from "@ursamu/core";
+import { addCmd, DBObj, flags, parser, send } from "@ursamu/core";
 import { db } from "..";
-import { center, idle, name, repeat, target } from "../utils/utils";
+import { center, columns, idle, name, repeat, target } from "../utils/utils";
 
 interface TextDescParts {
   tarName: string;
   desc: string;
   items: Item[];
-  flags: string;
+  flgs: string;
   width?: number;
+  en: DBObj;
 }
 
 interface Item {
@@ -55,10 +56,11 @@ export default () => {
     tarName,
     desc,
     items,
-    flags,
+    flgs,
     width = 78,
+    en,
   }: TextDescParts) => {
-    return (
+    let rtrn =
       center(
         `%cy<%ch<%cn%ch ${tarName} %ch%cy>%cn%cy>%cn`,
         width,
@@ -66,16 +68,42 @@ export default () => {
       ) +
       "%r%r" +
       desc +
-      "%r%r" +
-      center(`%cy<%ch<%cn%ch Characters %cy>%cn%cy>%cn`, width, "%cb-%cb-%cn") +
-      "%r" +
-      items
-        .filter((item) => item.flags.includes("connected"))
-        .map((char) => charStatus(char, width))
-        .join("%r") +
-      "%r" +
-      repeat("%cb=%ch-%cn", width)
-    );
+      "%r%r";
+
+    const chars = items.filter((item) => item.flags.includes("connected"));
+    const exits = items.filter((item) => item.flags.includes("exit"));
+    if (
+      chars.length > 0 &&
+      (!flgs.includes("dark") || flags.check(en.flags, "staff+"))
+    ) {
+      rtrn +=
+        center(
+          `%cy<%ch<%cn%ch Characters %cy>%cn%cy>%cn`,
+          width,
+          "%cb-%cb-%cn"
+        ) +
+        "%r" +
+        items
+          .filter((item) => item.flags.includes("connected"))
+          .map((char) => charStatus(char, width))
+          .join("%r") +
+        "%r";
+    }
+
+    if (
+      exits.length > 0 &&
+      (!flgs.includes("dark") || flags.check(en.flags, "staff+"))
+    ) {
+      const exitNames = exits.map((exit) => exit.name);
+      rtrn +=
+        center(`%cy<%ch<%cn%ch Exits %cy>%cn%cy>%cn`, width, "%cb-%cb-%cn") +
+        "%r" +
+        columns(exitNames, width, 3) +
+        "%r";
+    }
+
+    rtrn += repeat("%cb=%ch-%cn", width);
+    return rtrn;
   };
 
   addCmd({
@@ -115,8 +143,9 @@ export default () => {
             tarName,
             desc: tar.description,
             items,
-            flags: tar.flags,
+            flgs: tar.flags,
             width: ctx.data.width,
+            en: ctx.player!,
           }),
           {
             type: "look",

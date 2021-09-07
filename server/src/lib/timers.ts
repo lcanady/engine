@@ -8,8 +8,6 @@ setInterval(async () => {
     },
   });
 
-  console.log(conns.length);
-
   if (players) {
     for (const player of players) {
       const diff = Math.round(
@@ -17,7 +15,6 @@ setInterval(async () => {
       );
 
       const conn = conns.find((conn) => {
-        if (conn.cid === player._id) console.log(conn.cid);
         return conn.cid === player._id;
       });
 

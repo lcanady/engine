@@ -6,7 +6,6 @@ import {
   flags,
   MUSocket,
   parser,
-  send,
   verify,
 } from "@ursamu/core";
 import { db } from "..";
@@ -25,8 +24,15 @@ export const login = async (
     ? (await verify(token || "", process.env.SECRET || "")).id || ""
     : "";
 
-  const regex = new RegExp(id ? id : name, "i");
-  const player = (await db.find({ $or: [{ name: regex }, { _id: regex }] }))[0];
+  const regex = new RegExp(
+    id ? id : name?.startsWith("#") ? name.slice(1) : name,
+    "i"
+  );
+  const player = (
+    await db.find({
+      $or: [{ name: regex }, { _id: regex }, { dbref: parseInt(id) }],
+    })
+  )[0];
 
   if (player && !id) {
     if ((await compare(password || "", player.password || "")) || id) {
@@ -38,8 +44,6 @@ export const login = async (
     const { tags } = flags.set(player.flags, {}, "connected");
     player.temp = {};
     player.flags = tags;
-  } else {
-    await send(ctx.id, "Permission denied");
   }
   await db.update({ _id: id }, player);
   return player;
@@ -56,7 +60,11 @@ export const target = async (enactor: DBObj, tar: string) => {
         await db.find({
           $where: function () {
             if (
-              this.name.toLowerCase() === tar ||
+              this.dbref === parseInt(tar.slice(1), 10) ||
+              this.name
+                .toLowerCase()
+                .split(";")
+                .find((piece: string) => piece === tar) ||
               this._id === tar ||
               this.alias?.toLowerCase() === tar
             ) {
@@ -74,9 +82,27 @@ export const createEntity = async (
   flags: string = "",
   data: Data = {}
 ) => {
+  const id = async () => {
+    const dbrefs = (await db.find({})).map((item) => item.dbref) as number[];
+
+    var mia = dbrefs.reduce(function (acc: number[], cur, ind, arr) {
+      var diff = cur - arr[ind - 1];
+      if (diff > 1) {
+        var i = 1;
+        while (i < diff) {
+          acc.push(arr[ind - 1] + i);
+          i++;
+        }
+      }
+      return acc;
+    }, []);
+    return mia.length > 0 ? mia[0] : dbrefs.length;
+  };
+
   const entity: DBObj = {
     attrs: {},
     data: {},
+    dbref: await id(),
     description: "You see nothing special",
     flags,
     location: "",
@@ -105,8 +131,14 @@ export const canEdit = (en: DBObj, tar: DBObj) => {
 };
 
 export const name = (en: DBObj, tar: DBObj, bold = false) => {
-  let name = bold ? `%ch${tar.name}%cn` : tar.name;
-  if (canEdit(en, tar)) name += `(${flags.codes(tar.flags)})`;
+  const parts = tar.name.split(";");
+  let name = bold ? `%ch${parts[0]}%cn` : parts[0];
+  if (canEdit(en, tar) && !parts[1])
+    name += `(#${tar.dbref}${flags.codes(tar.flags)})`;
+  if (parts[1])
+    name = `%ch${tar.flags.includes("dark") ? "* " : "  "}${parts[0]}(#${
+      tar.dbref
+    }${flags.codes(tar.flags)}) <%cy${parts[1].toUpperCase()}%cn%ch>%cn`;
   return name;
 };
 
@@ -233,7 +265,9 @@ export const columns = (
           3
       );
 
-    if (parser.stripSubs("telnet", line + cell).length < width) {
+    if (list.length < 2) {
+      table += list.join("%r");
+    } else if (parser.stripSubs("telnet", line + cell).length < width) {
       line += cell;
     } else {
       table += line + "%r";
@@ -241,5 +275,19 @@ export const columns = (
     }
   }
 
+  table += line;
   return table;
+};
+
+/**
+ * Set a flag experession on a target
+ * @param tar The  target whos flags we're setting
+ * @param flgs The flag expression.
+ * @returns {DBObj}
+ */
+export const set = async (tar: DBObj, flgs: string) => {
+  const { tags } = flags.set(tar.flags, {}, flgs);
+  tar.flags = tags;
+  await db.update({ _id: tar._id }, tar);
+  return tar;
 };

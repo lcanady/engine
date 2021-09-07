@@ -33,8 +33,20 @@ export default () => {
       lock: "wizard+",
     },
     {
+      name: "exit",
+      code: "e",
+      lvl: 0,
+      lock: "wizard+",
+    },
+    {
       name: "connected",
-      code: "c",
+      code: "C",
+      lvl: 0,
+      lock: "wizard+",
+    },
+    {
+      name: "dark",
+      code: "D",
       lvl: 0,
       lock: "wizard+",
     }

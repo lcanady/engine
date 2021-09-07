@@ -57,7 +57,7 @@ export default () => {
           topic.help ? `${topic.name}` : `%ch%cr${topic.name}%cn`
         );
         help += "Help is available for the following topics:%r%r";
-        help += columns(topicList, ctx.data.width, 4) + "%r";
+        help += columns(topicList, ctx.data.width, 4) + "%r%r";
         help += repeat("%cr=%ch-%cn", ctx.data.width) + "%r%r";
         help += "Type '%chhelp <topic>%cn' for more help.%r";
 

@@ -1,4 +1,4 @@
-import { addCmd, flags, force, hash, send } from "@ursamu/core";
+import { addCmd, conns, flags, force, hash, send, sign } from "@ursamu/core";
 import { config, db } from "..";
 import { createEntity, login } from "../utils/utils";
 
@@ -21,7 +21,9 @@ export default () => {
       if (!taken.length) {
         const name = new RegExp(config.get("startingRoom") || "Limbo", "i");
         const objs = await db.find({});
-        const room = objs.find((obj) => name.test(obj.name));
+        const room =
+          objs.find((obj) => name.test(obj.name)) ||
+          (await createEntity("Limbo", "room"));
         const players = objs.find((obj) => obj.flags.includes("player"));
         const pwd = await hash(args[2]);
         // Create a new entity.
@@ -40,6 +42,24 @@ export default () => {
 
         // Log the new player in and fire off some beginning commands!
         await login(ctx, { name: args[1], password: args[2] });
+        ctx.socket.cid = player?._id;
+        ctx.player = player;
+        ctx.socket.join(player?._id || "");
+        ctx.socket.join(player?.location || "");
+
+        const token = await sign(player?._id!, process.env.SECRET || "").catch(
+          (err) => console.log(err)
+        );
+
+        const conn = conns.find((conn) => conn.id === ctx.id);
+        if (!conn) conns.push(ctx.socket);
+
+        await send(ctx.socket.id, "", {
+          type: "self",
+          id: player?._id,
+          flags: player?.flags,
+          token,
+        });
         await force(ctx, "motd");
         await force(ctx, "look");
       } else {

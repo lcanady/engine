@@ -51,6 +51,7 @@ export const login = async (
       lastCommand: player.temp.lastCommand
         ? player.temp.lastCommand
         : Date.now(),
+      lastPage: player.temp.lastPage ? player.temp.lastPage : "",
     };
     player.flags = tags;
   }
@@ -210,10 +211,11 @@ export const remainder = (str: string, width: number, type = "telnet") => {
   return pad;
 };
 
-export const pose = (name: string, str: String) => {
+export const pose = (name: string, str: String, def = "") => {
   if (str.startsWith(":")) return `${name} ${str.slice(1)}`;
   if (str.startsWith(";")) return `${name}${str.slice(1)}`;
-  return `${name}: ${str}`;
+  if (str.startsWith('"')) return `${name}, says "${str.slice(1)}"`;
+  return `${name}${def ? " " + def : ""}: ${str}`;
 };
 
 export const cmsg = async (id: string, en: DBObj, msg: string) => {
@@ -271,6 +273,13 @@ export const center = (str = "", width = 78, filler = " ", type = "telnet") => {
   );
 };
 
+/**
+ * Break an array into spaced columns
+ * @param list The array to be broken up
+ * @param width The width of the overall table.
+ * @param columns The number of columns.
+ * @returns
+ */
 export const columns = (
   list: string[],
   width: number = 78,

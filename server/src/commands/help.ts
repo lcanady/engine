@@ -22,7 +22,7 @@ export default () => {
             ) +
             "%r%r";
 
-          topic += help.body + "%r";
+          topic += help.body.trim() + "%r%r";
           topic += repeat("%cr=%ch-%cn", ctx.data.width) + "%r";
 
           send(ctx.id, topic, {

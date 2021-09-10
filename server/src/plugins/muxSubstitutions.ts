@@ -37,6 +37,11 @@ export default () => {
       before: /\[(.*)\]\(([^\)]+)\)/g,
       after: "%ch$1:%cn %u$2%cn",
       strip: "$1: $2",
+    },
+    {
+      before: /`{1,3}([\s\S]+)`{1,3}/g,
+      after: "$1",
+      strip: "$1",
     }
   );
 

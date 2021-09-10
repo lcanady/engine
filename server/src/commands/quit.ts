@@ -13,6 +13,7 @@ export default () => {
       if (ctx.player) {
         const { tags } = flags.set(ctx.player?.flags || "", {}, "!connected");
         ctx.player!.flags = tags;
+        ctx.player.temp = {};
         db.update({ _id: ctx.player?._id }, ctx.player!);
         send(ctx.player?.location, `${ctx.player?.name} has disconnected.`);
       }

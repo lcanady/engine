@@ -16,11 +16,29 @@ function hexToRgb(hex: string) {
 
 export default () => {
   // Markdown substitutions
-  parser.addSubs("telnet", {
-    before: "\\*\\*([^\\*]+)\\*\\*",
-    after: "%ch$1%cn",
-    strip: "$1",
-  });
+  parser.addSubs(
+    "telnet",
+    {
+      before: /\*\*([^\*]+)\*\*/g,
+      after: "%ch$1%cn",
+      strip: "$1",
+    },
+    {
+      before: /^>\s+([\s|\S]+)/g,
+      after: "$1",
+      strip: "$1",
+    },
+    {
+      before: /`([^`]+)`/g,
+      after: "%u$1%cn",
+      strip: "$1",
+    },
+    {
+      before: /\[(.*)\]\(([^\)]+)\)/g,
+      after: "%ch$1:%cn %u$2%cn",
+      strip: "$1: $2",
+    }
+  );
 
   // Ansi substitutions
   parser.addSubs(

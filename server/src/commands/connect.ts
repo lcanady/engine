@@ -1,4 +1,13 @@
-import { addCmd, force, send, conns, sign, hooks } from "@ursamu/core";
+import {
+  addCmd,
+  force,
+  send,
+  conns,
+  sign,
+  hooks,
+  io,
+  emitter,
+} from "@ursamu/core";
 import { login } from "../utils/utils";
 
 export default () => {
@@ -17,6 +26,7 @@ export default () => {
 
       ctx.socket.cid = player?._id;
       ctx.player = player;
+      emitter.emit("connected", player);
       ctx.socket.join(player?._id || "");
       ctx.socket.join(player?.location || "");
 
@@ -26,7 +36,6 @@ export default () => {
 
       const conn = conns.find((conn) => conn.id === ctx.id);
       if (!conn) conns.push(ctx.socket);
-
       await send(ctx.socket.id, "", {
         type: "self",
         id: player?._id,
@@ -37,7 +46,7 @@ export default () => {
         await force(ctx, "motd");
         await force(ctx, "look");
       } else {
-        send(ctx.id, "Wrong Password. Permision denied.");
+        send(ctx.id, "Permision denied.");
       }
     },
   });

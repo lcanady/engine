@@ -1,4 +1,13 @@
-import { addCmd, conns, flags, force, hash, send, sign } from "@ursamu/core";
+import {
+  addCmd,
+  conns,
+  flags,
+  force,
+  hash,
+  io,
+  send,
+  sign,
+} from "@ursamu/core";
 import { config, db } from "..";
 import { createEntity, login } from "../utils/utils";
 
@@ -27,7 +36,7 @@ export default () => {
         const players = objs.find((obj) => obj.flags.includes("player"));
         const pwd = await hash(args[2]);
         // Create a new entity.
-        const player = await createEntity(
+        let player = await createEntity(
           args[1],
           players ? "player" : "player immortal",
           {
@@ -41,7 +50,7 @@ export default () => {
         await db.update({ id: player._id }, player);
 
         // Log the new player in and fire off some beginning commands!
-        await login(ctx, { name: args[1], password: args[2] });
+        player = await login(ctx, { name: args[1], password: args[2] });
         ctx.socket.cid = player?._id;
         ctx.player = player;
         ctx.socket.join(player?._id || "");
@@ -54,6 +63,7 @@ export default () => {
         const conn = conns.find((conn) => conn.id === ctx.id);
         if (!conn) conns.push(ctx.socket);
 
+        io.to(player.location).emit("login", player);
         await send(ctx.socket.id, "", {
           type: "self",
           id: player?._id,

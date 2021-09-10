@@ -38,11 +38,39 @@ export default () => {
         }
       } else {
         const topics = cmds.map((cmd) => {
+          const entry = textDB
+            .get("help")
+            ?.find((text) => text.name === cmd.name);
           return {
             name: cmd.name,
-            help: !!textDB.get("help")?.find((text) => text.name === cmd.name),
+            help: !!entry,
+            category: entry?.category || "misc",
+            visible: entry?.visible || true,
           };
         });
+
+        const files =
+          textDB
+            .get("help")
+            ?.filter((file) => !cmds.find((cmd) => cmd.name === file.name))
+            .map((file) => ({
+              name: file.name,
+              help: true,
+              category: file?.category || "misc",
+              visible: !!file?.visible,
+            })) || [];
+        const combined = [...files, ...topics];
+
+        const totalTopics = combined
+          .map((top) => (top.help ? top.name : `%ch%cr${top.name}%cn`))
+          .sort((a, b) =>
+            parser
+              .stripSubs("telnet", a)
+              .localeCompare(parser.stripSubs("telnet", b))
+          );
+        const categories = [
+          ...new Set(combined.map((top) => top.category)),
+        ].sort((a, b) => a.localeCompare(b));
 
         let help =
           "%r" +
@@ -51,15 +79,27 @@ export default () => {
             ctx.data.width,
             "%cr=%ch-%cn"
           ) +
-          "%r%r";
+          "%r%rHelp is available for the following topics:%r%r";
 
-        const topicList = topics.map((topic) =>
-          topic.help ? `${topic.name}` : `%ch%cr${topic.name}%cn`
-        );
-        help += "Help is available for the following topics:%r%r";
-        help += columns(topicList, ctx.data.width, 4) + "%r%r";
-        help += repeat("%cr=%ch-%cn", ctx.data.width) + "%r%r";
-        help += "Type '%chhelp <topic>%cn' for more help.%r";
+        for (const cat of categories) {
+          help += center(
+            `%cy<%ch<%cn%ch ${cat} %cy>%cn%cy>%cn`,
+            ctx.data.width,
+            "%cr-%cr-%cn"
+          );
+          help +=
+            "%r" +
+            columns(
+              combined
+                .filter((topic) => topic.category === cat)
+                .map((itm) => (itm.help ? itm.name : `%ch%cr${itm.name}%cn`)),
+              ctx.data.width,
+              4
+            ) +
+            "%r";
+        }
+        help += "%rType '%chhelp <topic>%cn' for more help.%r";
+        help += repeat("%cr=%ch-%cn", ctx.data.width);
 
         await send(ctx.id, help, { type: "helpTopics", topics });
       }

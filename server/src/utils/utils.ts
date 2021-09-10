@@ -1,14 +1,19 @@
 import {
+  ChannelEntry,
   compare,
   Context,
   Data,
   DBObj,
   flags,
+  io,
   MUSocket,
   parser,
   verify,
 } from "@ursamu/core";
-import { db } from "..";
+import { PathLike } from "fs";
+import { readdir, readFile } from "fs/promises";
+import { basename, resolve } from "path";
+import { channels, db } from "..";
 
 interface LoginOptions {
   name?: string;
@@ -42,10 +47,15 @@ export const login = async (
     }
   } else if (id) {
     const { tags } = flags.set(player.flags, {}, "connected");
-    player.temp = {};
+    player.temp = {
+      lastCommand: player.temp.lastCommand
+        ? player.temp.lastCommand
+        : Date.now(),
+    };
     player.flags = tags;
   }
   await db.update({ _id: id }, player);
+  player.data.channels?.forEach((chan) => ctx.socket.join(chan._id));
   return player;
 };
 
@@ -113,13 +123,6 @@ export const createEntity = async (
   };
 
   return await db.create(entity);
-};
-
-export const join = (socket: MUSocket, tar: DBObj) => {
-  // Join channels
-  socket.join(tar.location);
-  socket.join(tar._id!);
-  tar.data.channels?.forEach((channel: string) => socket.join(channel));
 };
 
 export const canEdit = (en: DBObj, tar: DBObj) => {
@@ -207,6 +210,25 @@ export const remainder = (str: string, width: number, type = "telnet") => {
   return pad;
 };
 
+export const pose = (name: string, str: String) => {
+  if (str.startsWith(":")) return `${name} ${str.slice(1)}`;
+  if (str.startsWith(";")) return `${name}${str.slice(1)}`;
+  return `${name}: ${str}`;
+};
+
+export const cmsg = async (id: string, en: DBObj, msg: string) => {
+  const channel = await channels.get(id);
+  const entry = en.data?.channels?.find((ent) => ent._id === id);
+
+  const header = () =>
+    channel?.header ? channel.header : "%ch[" + channel?.name + "]%cn";
+
+  if (channel && entry) {
+    return `${header()} ${pose(entry.title ? entry.title : en.name, msg)}`;
+  }
+  return "";
+};
+
 /**
  * Repeat a string.
  * @param str The string to be releated
@@ -262,12 +284,10 @@ export const columns = (
       repeat(
         " ",
         Math.round(width / columns - parser.stripSubs("telnet", item).length) -
-          3
+          1
       );
 
-    if (list.length < 2) {
-      table += list.join("%r");
-    } else if (parser.stripSubs("telnet", line + cell).length < width) {
+    if (parser.stripSubs("telnet", line + cell).length < width) {
       line += cell;
     } else {
       table += line + "%r";
@@ -291,3 +311,13 @@ export const set = async (tar: DBObj, flgs: string) => {
   await db.update({ _id: tar._id }, tar);
   return tar;
 };
+
+export const header = (str: string, width: number, color: string) =>
+  center(`%cy<%ch<%cn%ch ${str} %cy>%cn%cy>%cn`, width, `%c${color}=%ch-%cn`);
+
+export const headerNarrow = (str: string, width: number, color: string) =>
+  center(
+    `%cy<%ch<%cn%ch ${str} %cy>%cn%cy>%cn`,
+    width,
+    `%c${color}-%c${color}-%cn`
+  );

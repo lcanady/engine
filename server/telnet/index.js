@@ -35,6 +35,8 @@ const server = telnetlib.createServer(
       c.write(connect + "\r\n");
     });
 
+    s.io.on("reconnect", () => s.send({ msg: "", data: { token } }));
+
     s.on("message", (ctx) => {
       const { token: tkn, connected, command } = ctx.data;
       if (tkn) token = tkn;

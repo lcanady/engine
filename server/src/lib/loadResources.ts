@@ -1,6 +1,7 @@
 import { loaddir, textDB } from "@ursamu/core";
 import { Dirent, PathLike } from "fs";
 import { readFile } from "fs/promises";
+import matter from "gray-matter";
 import path from "path";
 
 (async () => {
@@ -19,9 +20,14 @@ import path from "path";
     path.join(__dirname, "../../help/"),
     async (file: Dirent, path: PathLike) => {
       const text = await readFile(`${path}/${file.name}`, { encoding: "utf8" });
-      textDB.set("help", [
-        { name: file.name.split(".")[0], category: "help", body: text },
-      ]);
+      const res = matter(text);
+      textDB.get("help")?.push({
+        name: res.data.name ? res.data.name : file.name.split(".")[0],
+        category: res.data.category ? res.data.category : "general",
+        body: res.content,
+        visible: res.data.visible || true,
+        lock: res.data.lock ? res.data.lock : "",
+      });
     }
   );
 

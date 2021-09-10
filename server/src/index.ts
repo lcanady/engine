@@ -10,6 +10,10 @@ import {
   io,
   MUSocket,
   Context,
+  send,
+  emitter,
+  Channel,
+  textDB,
 } from "@ursamu/core";
 import path, { join } from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -18,6 +22,7 @@ import dotenv from "dotenv";
 import commands from "./hooks/commands";
 import auth from "./hooks/auth";
 import defaults from "./hooks/default";
+import chans from "./hooks/chans";
 import move from "./hooks/move";
 import "./lib/loadResources";
 import "./lib/timers";
@@ -42,15 +47,6 @@ export const config = new Config(path.resolve("../config/"));
 app.use("/api/v1/wiki", wikiRoutes);
 app.use("/api/v1/chars", charRoutes);
 
-export interface Channel {
-  name: string;
-  header?: string;
-  read?: string;
-  write?: string;
-  modify?: string;
-  provate?: boolean;
-}
-
 // Assign DB references.
 export const db = new DB<DBObj>(path.resolve(__dirname, "../../data/db.db"));
 export const channels = new DB<Channel>(
@@ -70,7 +66,7 @@ export type Msg = {
 export const msgs = new DB<Msg>(path.resolve(__dirname, "../../data/msgs.db"));
 
 // load hooks.
-hooks.use(auth, commands, move, defaults);
+hooks.use(auth, commands, chans, move, defaults);
 
 app.use("/uploads", express.static(join(__dirname, "uploads")));
 app.use(express.static(path.resolve(__dirname, "../../client/build/")));
@@ -89,6 +85,14 @@ io.on("connect", async (socket: MUSocket) => {
     ctx.id = socket.id;
     await hooks.execute(ctx);
   });
+});
+
+textDB.set("help", []);
+textDB.set("text", []);
+
+emitter.on("connected", (player: DBObj) => {
+  if (!player.flags.includes("dark"))
+    send(player.location, `${player.name} has connected.`);
 });
 
 server.listen(4201, () => console.log(intro));

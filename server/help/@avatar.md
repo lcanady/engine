@@ -1,5 +1,6 @@
 ---
 name: "@avatar"
+category: Roleplay Commands
 ---
 
 STYNAX: [+ or @]avatar <target> = <URL>

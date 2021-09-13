@@ -40,14 +40,14 @@ export default () => {
     if (char.flags.includes("immortal")) tag = "%ch%cy*%cn%b";
 
     return `${tag}${
-      char.name + " ".repeat(30 - parser.stripSubs("telnet", char.name).length)
+      char.name + " ".repeat(25 - parser.stripSubs("telnet", char.name).length)
     }%b${
       " ".repeat(5 - parser.stripSubs("telnet", colorIdle).length) +
       colorIdle +
-      "%b"
+      "%b%b%b"
     }${
       char.shortdesc
-        ? char.shortdesc.substring(0, width - 40)
+        ? char.shortdesc.substring(0, width - 35)
         : "%ch%cxType '+shortdesc <desc>' to set.%cn"
     }`;
   };
@@ -130,7 +130,7 @@ export default () => {
             name: name(ctx.player!, item),
             id: item._id!,
             desc: item.description,
-            shortdesc: item.data.shortdesc,
+            shortdesc: item.data.shortDesc,
             avatar: item.data.avatar,
             flags: item.flags,
             idle: idle(item.temp.lastCommand || Date.now()),

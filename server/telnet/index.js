@@ -28,13 +28,6 @@ const server = telnetlib.createServer(
     });
     c.write(connect + "\r\n");
 
-    s.on("login", async () => {
-      const connect = await readFile(join(__dirname, "../text/connect.txt"), {
-        encoding: "utf8",
-      });
-      c.write(connect + "\r\n");
-    });
-
     s.io.on("reconnect", () => s.send({ msg: "", data: { token } }));
 
     s.on("message", (ctx) => {

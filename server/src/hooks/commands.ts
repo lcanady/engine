@@ -1,4 +1,4 @@
-import { cmds, Context, DB, flags, Next, send } from "@ursamu/core";
+import { cmds, Context, DB, emitter, flags, Next, send } from "@ursamu/core";
 import e from "cors";
 import { db } from "..";
 
@@ -17,13 +17,14 @@ export default async (ctx: Context, next: Next) => {
           flags.check(ctx.player?.flags || "", cmd.flags) ||
           cmd.name === "quit"
         ) {
+          emitter.emit("command", { player: ctx.player, name: cmd.name });
           return await cmd.render(match, ctx);
         } else {
           return next();
         }
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     send(ctx.id, `Oops! You've found a bug! ${error.message}`);
   }
 

@@ -321,7 +321,7 @@ export const set = async (tar: DBObj, flgs: string) => {
   return tar;
 };
 
-export const header = (str: string, width: number, color: string) =>
+export const header = (str: string, width: number, color: string = "b") =>
   center(`%cy<%ch<%cn%ch ${str} %cy>%cn%cy>%cn`, width, `%c${color}=%ch-%cn`);
 
 export const headerNarrow = (str: string, width: number, color: string) =>
@@ -330,3 +330,30 @@ export const headerNarrow = (str: string, width: number, color: string) =>
     width,
     `%c${color}-%c${color}-%cn`
   );
+
+export const idleColor = (idleTime: number) => {
+  const str = idle(idleTime);
+  const match = str.match(/(\d{1,3})(\w)/);
+  if (match) {
+    let [_, time, mark] = match;
+    let currTime = parseInt(time, 10);
+    if (mark === "s") return `%ch%cg${str}%cn`;
+    if (mark === "m" && currTime < 15) return `%cg${str}%cn`;
+    if (mark === "m" && currTime > 14 && currTime < 30)
+      return `%ch%cy${str}%cn`;
+    if (mark === "m" && currTime > 30) return `%ch%cr${str}%cn`;
+    if (mark === "h") return `%ch%cx${str}%cn`;
+  }
+  return str;
+};
+
+/**
+ * Return a boolean value if a player can see something.
+ * @param en The action enactor
+ * @param tar The action target
+ * @returns
+ */
+export const canSee = (en: DBObj, tar: DBObj) =>
+  (tar.flags.includes("dark") && flags.lvl(en.flags) >= flags.lvl(tar.flags)) ||
+  (flags.check(en.flags, "staff+") && tar.flags.includes("dark")) ||
+  flags.check(tar.flags, "!dark");

@@ -18,6 +18,7 @@ export default () => {
         `Done. New room created: %ch${name(ctx.player!, toRoom)}%cn`
       );
 
+      // Create to exit
       if (args[3]) {
         toExit = await createEntity(args[3], "exit", {
           owner: ctx.player?._id,
@@ -35,6 +36,7 @@ export default () => {
         );
       }
 
+      // Create from exit
       if (args[4]) {
         fromExit = await createEntity(args[4], "exit", {
           owner: ctx.player?._id,

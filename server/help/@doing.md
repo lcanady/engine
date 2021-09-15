@@ -1,5 +1,6 @@
 ---
 category: OOC Information
+desc: Set a message on WHO
 ---
 
 **@doing**

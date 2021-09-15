@@ -283,28 +283,44 @@ export const center = (str = "", width = 78, filler = " ", type = "telnet") => {
 export const columns = (
   list: string[],
   width: number = 78,
-  columns: number = 4
+  columns: number = 4,
+  sep: string = " "
 ) => {
   let line = "";
   let table = "";
-  for (const item of list) {
-    const cell =
-      item +
-      repeat(
-        " ",
-        Math.round(width / columns - parser.stripSubs("telnet", item).length) -
-          1
-      );
+  let ct = -1;
+  if (columns <= 1) {
+    table = list
+      .map((item) => {
+        return (
+          item + repeat(" ", width - parser.stripSubs("telnet", item).length)
+        );
+      })
+      .join("%r");
+  } else {
+    for (const idx in list) {
+      let cellWidth =
+        Math.round(
+          width / columns - parser.stripSubs("telnet", list[idx]).length
+        ) -
+        sep.length -
+        1;
 
-    if (parser.stripSubs("telnet", line + cell).length < width) {
-      line += cell;
-    } else {
-      table += line + "%r";
-      line = cell;
+      const cell =
+        list[idx] +
+        repeat(" ", cellWidth) +
+        `${ct++ % columns !== 0 ? sep + " " : ""}`;
+
+      if (parser.stripSubs("telnet", line + cell).length <= width) {
+        line += cell;
+      } else {
+        table += line + "%r";
+        line = cell;
+      }
     }
-  }
 
-  table += line;
+    table += line;
+  }
   return table;
 };
 

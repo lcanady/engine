@@ -1,5 +1,6 @@
 ---
 category: communication
+desc: Send a private message to players
 ---
 
 **Page**

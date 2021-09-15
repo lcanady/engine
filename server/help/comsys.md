@@ -1,5 +1,6 @@
 ---
 name: comsys
+desc: Channel system commands
 category: communication
 ---
 

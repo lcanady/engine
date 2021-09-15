@@ -1,5 +1,4 @@
 import { conns, Context, Next, send, sign, verify } from "@ursamu/core";
-import { db } from "..";
 import { login } from "../utils/utils";
 
 export default async (ctx: Context, next: Next) => {
@@ -11,8 +10,10 @@ export default async (ctx: Context, next: Next) => {
     ctx.socket.join(player?.location || "");
 
     const conn = conns.find((conn) => conn.id === ctx.id);
-
     if (!conn) conns.push(ctx.socket);
+
+    const token = await sign(ctx.player._id!, process.env.SECRET || "");
+    await send(ctx.id, "", { token });
   }
 
   next();

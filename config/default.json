@@ -1,3 +1,11 @@
 {
-  "Port": 4201
+  "gameName": "UrsamMU",
+  "wsPort": 4201,
+  "telnetPort": 4202,
+
+  "players": {
+    "startingRoom": "#0",
+    "flags": "newbie",
+    "data": {}
+  }
 }

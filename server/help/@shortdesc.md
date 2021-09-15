@@ -1,6 +1,7 @@
 ---
 name: "@shortdesc"
 category: Roleplay Commands
+desc: Set a quick desc for the room
 ---
 
 **_@shortdesc_**

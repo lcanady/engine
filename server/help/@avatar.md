@@ -1,6 +1,7 @@
 ---
 name: "@avatar"
 category: Roleplay Commands
+desc: Set your avatar image
 ---
 
 STYNAX: [+ or @]avatar <target> = <URL>

@@ -27,6 +27,7 @@ import path from "path";
         body: res.content,
         visible: res.data.visible || true,
         lock: res.data.lock ? res.data.lock : "",
+        desc: res.data.desc ? res.data.desc : "",
       });
     }
   );

@@ -14,6 +14,8 @@ import {
   emitter,
   Channel,
   textDB,
+  conns,
+  remConn,
 } from "@ursamu/core";
 import path, { join } from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -79,6 +81,8 @@ app.get("*", (req, res) => {
 io.on("connect", async (socket: MUSocket) => {
   // send a connect message!
   socket.join(socket.id);
+
+  socket.on("disconnect", () => remConn(socket.id));
 
   socket.on("message", async (ctx: Context) => {
     ctx.socket = socket;

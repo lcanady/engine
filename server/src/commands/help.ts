@@ -1,5 +1,4 @@
 import { addCmd, cmds, parser, send, textDB } from "@ursamu/core";
-import e from "cors";
 import { center, columns, repeat } from "../utils/utils";
 
 export default () => {
@@ -46,6 +45,7 @@ export default () => {
             help: !!entry,
             category: entry?.category || "misc",
             visible: entry?.visible || true,
+            desc: entry?.desc || "",
           };
         });
 
@@ -58,6 +58,7 @@ export default () => {
               help: true,
               category: file?.category || "misc",
               visible: !!file?.visible,
+              desc: file?.desc || "",
             })) || [];
         const combined = [...files, ...topics];
 
@@ -92,9 +93,26 @@ export default () => {
             columns(
               combined
                 .filter((topic) => topic.category === cat)
-                .map((itm) => (itm.help ? itm.name : `%ch%cr${itm.name}%cn`)),
+                .map((itm) => {
+                  const width =
+                    Math.floor(
+                      ctx.data.width / (ctx.data.width >= 78 ? 2 : 1)
+                    ) - (ctx.data.width >= 78 ? 2 : 0);
+                  let output = itm.help
+                    ? `%ch${itm.name.toUpperCase()}%cn`
+                    : `%ch%cr${itm.name.toUpperCase()}%cn `;
+
+                  output =
+                    output +
+                    ".".repeat(15 - parser.stripSubs("telnet", output).length);
+                  output += itm.desc
+                    ? itm.desc.substr(0, width - 15)
+                    : ".".repeat(width - 15);
+                  return output;
+                }),
               ctx.data.width,
-              4
+              ctx.data.width >= 78 ? 2 : 1,
+              "|"
             ) +
             "%r";
         }

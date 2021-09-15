@@ -42,15 +42,9 @@ export default () => {
     const words = args[0] || "";
     const width = parseInt(args[1]) || 78;
     const filler = args[2] || " ";
-    const subWords = parser.stripSubs(
-      data.type ? data.type : "telnet",
-      words
-    ).length;
+    const subWords = parser.stripSubs("telnet", words).length;
 
-    const subFiller = parser.stripSubs(
-      data.type ? data.type : "telnet",
-      filler
-    ).length;
+    const subFiller = parser.stripSubs("telnet", filler).length;
 
     const adjWidth = Math.floor((width - subWords) / 2);
     const repWidth = Math.floor(adjWidth / subFiller);
@@ -78,15 +72,9 @@ export default () => {
     const words = args[0] || "";
     const width = parseInt(args[1]) || 78;
     const filler = args[2] || " ";
-    const subWords = parser.stripSubs(
-      data.type ? data.type : "telnet",
-      words
-    ).length;
+    const subWords = parser.stripSubs("telnet", words).length;
 
-    const subFiller = parser.stripSubs(
-      data.type ? data.type : "telnet",
-      filler
-    ).length;
+    const subFiller = parser.stripSubs("telnet", filler).length;
 
     const adjWidth = Math.floor(width - subWords);
     const repWidth = Math.floor(adjWidth / subFiller);

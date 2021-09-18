@@ -16,6 +16,7 @@ import {
   textDB,
   conns,
   remConn,
+  flags,
 } from "@ursamu/core";
 import path, { join } from "path";
 import wikiRoutes from "./routes/wikiRoutes";
@@ -28,6 +29,7 @@ import chans from "./hooks/chans";
 import move from "./hooks/move";
 import "./lib/loadResources";
 import "./lib/timers";
+import { set } from "./utils/utils";
 
 dotenv.config();
 
@@ -82,7 +84,17 @@ io.on("connect", async (socket: MUSocket) => {
   // send a connect message!
   socket.join(socket.id);
 
-  socket.on("disconnect", () => remConn(socket.id));
+  socket.on("disconnect", async () => {
+    if (socket.cid) {
+      const player = await db.get(socket.cid);
+      if (player) {
+        await db.update({ _id: player._id }, await set(player, "!connected"));
+        if (!player.flags.includes("dark"))
+          await send(player.location, `${player.name} has disconnected.`);
+      }
+    }
+    remConn(socket.id);
+  });
 
   socket.on("message", async (ctx: Context) => {
     ctx.socket = socket;

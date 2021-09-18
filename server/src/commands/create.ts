@@ -9,7 +9,7 @@ import {
   sign,
 } from "@ursamu/core";
 import { config, db } from "..";
-import { createEntity, login } from "../utils/utils";
+import { createEntity, joinChans, login } from "../utils/utils";
 
 export default () => {
   addCmd({
@@ -38,7 +38,9 @@ export default () => {
         // Create a new entity.
         let player = await createEntity(
           args[1],
-          players ? "player" : "player immortal",
+          players
+            ? "player connected newbie"
+            : "player immortal connected newbie",
           {
             password: pwd,
             location: room?._id,
@@ -70,8 +72,10 @@ export default () => {
           flags: player?.flags,
           token,
         });
+
         await force(ctx, "motd");
         await force(ctx, "look");
+        await joinChans(ctx);
       } else {
         await send(ctx.id, "That name is already taken or unavailable.");
       }

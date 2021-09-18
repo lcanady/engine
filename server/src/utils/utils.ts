@@ -1,18 +1,13 @@
 import {
-  ChannelEntry,
   compare,
   Context,
   Data,
   DBObj,
   flags,
-  io,
-  MUSocket,
+  force,
   parser,
   verify,
 } from "@ursamu/core";
-import { PathLike } from "fs";
-import { readdir, readFile } from "fs/promises";
-import { basename, resolve } from "path";
 import { channels, db } from "..";
 
 interface LoginOptions {
@@ -56,7 +51,10 @@ export const login = async (
     player.flags = tags;
   }
   await db.update({ _id: id }, player);
-  player.data.channels?.forEach((chan) => ctx.socket.join(chan._id));
+  player.data.channels?.forEach((chan) => {
+    if (chan.joined) ctx.socket.join(chan._id);
+  });
+
   return player;
 };
 
@@ -226,7 +224,10 @@ export const cmsg = async (id: string, en: DBObj, msg: string) => {
     channel?.header ? channel.header : "%ch[" + channel?.name + "]%cn";
 
   if (channel && entry) {
-    return `${header()} ${pose(entry.title ? entry.title : en.name, msg)}`;
+    return `${header()} ${pose(
+      (entry.title ? entry.title : "") + (entry.mask ? entry.mask : en.name),
+      msg
+    )}`;
   }
   return "";
 };
@@ -373,3 +374,22 @@ export const canSee = (en: DBObj, tar: DBObj) =>
   (tar.flags.includes("dark") && flags.lvl(en.flags) >= flags.lvl(tar.flags)) ||
   (flags.check(en.flags, "staff+") && tar.flags.includes("dark")) ||
   flags.check(tar.flags, "!dark");
+
+export const joinChans = async (ctx: Context) => {
+  const chans = await channels.find({});
+
+  for (const chan of chans) {
+    const alias = chan.alias || "";
+    const pchan = ctx.player?.data.channels?.find(
+      (chann) => chann._id === chan._id
+    );
+
+    if (
+      alias.length > 0 &&
+      !pchan &&
+      flags.check(ctx.player?.flags || "", chan.access || "")
+    ) {
+      await force(ctx, `addcom ${chan.alias}=${chan.name}`);
+    }
+  }
+};

@@ -43,9 +43,9 @@ export default () => {
           return {
             name: cmd.name,
             help: !!entry,
-            category: entry?.category || "misc",
-            visible: entry?.visible || true,
-            desc: entry?.desc || "",
+            category: entry?.category ? entry.category : "misc",
+            visible: !cmd.hidden,
+            desc: entry?.desc ? entry.desc : "",
           };
         });
 
@@ -56,8 +56,8 @@ export default () => {
             .map((file) => ({
               name: file.name,
               help: true,
-              category: file?.category || "misc",
-              visible: !!file?.visible,
+              category: file?.category ? file.category : "misc",
+              visible: file?.visible,
               desc: file?.desc || "",
             })) || [];
         const combined = [...files, ...topics];
@@ -92,7 +92,7 @@ export default () => {
             "%r" +
             columns(
               combined
-                .filter((topic) => topic.category === cat)
+                .filter((topic) => topic.category === cat && topic.visible)
                 .map((itm) => {
                   const width =
                     Math.floor(

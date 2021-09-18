@@ -3,7 +3,8 @@ category: communication
 desc: Send a private message to players
 ---
 
-**Page**
+# Page
+
 `p <name>`
 `p[age] <name> [[<name>] [<name>]] = <message>`
 `p <message>`

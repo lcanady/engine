@@ -40,6 +40,7 @@ const server = telnetlib.createServer(
       }
     });
 
+    c.on("end", () => s.close());
     s.on("quit", () => c.end());
 
     c.on("data", (data) => {

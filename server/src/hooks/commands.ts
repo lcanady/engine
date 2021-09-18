@@ -25,7 +25,10 @@ export default async (ctx: Context, next: Next) => {
       }
     }
   } catch (error: any) {
-    send(ctx.id, `Oops! You've found a bug! ${error.message}`);
+    send(
+      ctx.id,
+      `Oops! You've found a bug! ${error.message}%r%r${error.stack.join("%r")}`
+    );
   }
 
   next();

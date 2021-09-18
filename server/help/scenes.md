@@ -17,9 +17,17 @@ The scene system is used to create managed spaces to RP. Think of a scene as a s
 ## Admin Commands
 
 - `+scene/set <option> = <value> (admin)` Change a scene setting.
+- `+scene/add <character>` Add a character to recieve notifications about the scene.
+- `+scene/remove <character>` Remove a character from a scene.
 
-**Scene/set Options**
+- **Scene/set Options**
 
-- `admins = <name list>` give list of names or dbrefs or alias to give those players rights to 'admin' commands.
-- `join = <flag expression>` Set the flags of who can view/join this scene.
--
+  - `admins = <name list>` give list of names or dbrefs or alias to give those players rights to 'admin' commands.
+  - `join = <flag expression>` Set the flags of who can view/join this scene.
+
+## Owner Commands
+
+Owner commands can only be used by game staff, and the owner of a scene,
+
+- `+scene/addstaff <character>`
+- `+secene/remstaff <character>`

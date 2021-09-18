@@ -24,13 +24,13 @@ export default () => {
       strip: "$1",
     },
     {
-      before: /^>\s+([\s|\S]+)/g,
-      after: "$1",
+      before: /[#]+\s+(.*)/g,
+      after: "%u$1%cn",
       strip: "$1",
     },
     {
-      before: /`([^`]+)`/g,
-      after: "%u$1%cn",
+      before: /^>\s+([\s|\S]+)/g,
+      after: "$1",
       strip: "$1",
     },
     {
@@ -39,8 +39,8 @@ export default () => {
       strip: "$1: $2",
     },
     {
-      before: /`{1,3}([\s\S]+)`{1,3}/g,
-      after: "$1",
+      before: /`{1,3}([^`]+)`{1,3}/g,
+      after: "%ch$1%cn",
       strip: "$1",
     }
   );

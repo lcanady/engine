@@ -1,14 +1,5 @@
-import {
-  addCmd,
-  force,
-  send,
-  conns,
-  sign,
-  hooks,
-  io,
-  emitter,
-} from "@ursamu/core";
-import { login } from "../utils/utils";
+import { addCmd, force, send, conns, sign, emitter } from "@ursamu/core";
+import { joinChans, login } from "../utils/utils";
 
 export default () => {
   addCmd({
@@ -45,6 +36,7 @@ export default () => {
       if (ctx.player) {
         await force(ctx, "motd");
         await force(ctx, "look");
+        await joinChans(ctx);
       } else {
         send(ctx.id, "Permision denied.");
       }
